@@ -27,19 +27,28 @@ return {
          player.width / 2, player.height, sprites
       )
 
+      player.render = function(self)
+         love.graphics.translate(self.x, self.y)
+         love.graphics.shear(self.shear_x, self.shear_y)
+
+         love.graphics.draw(sprites, self.sprite, 0, 0)
+
+         love.graphics.origin()
+
+      end
+
       player.draw = function(self)
 
          local render = {
             [GameObject.State.alive] = function()
-               love.graphics.translate(self.x, self.y)
-               love.graphics.shear(self.shear_x, self.shear_y)
-
-               love.graphics.draw(sprites, self.sprite, 0, 0)
-
-               love.graphics.origin()
+               self:render()
             end,
 
             [GameObject.State.dying] = function()
+               if self.dying_animation.scale_rate > 0 then
+                  self:render()
+               end
+
                local center_x = self.x + self.width / 2
                local center_y = self.y + self.height / 2
                -- love.graphics.circle("fill", center_x, center_y, 5)
