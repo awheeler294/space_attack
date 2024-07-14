@@ -151,6 +151,14 @@ local function create_scaling_animation(texture, width, sprite_sheet)
    }
 end
 
+local explosions = {
+   love.audio.newSource("resources/audio/explosionCrunch_000.ogg", "static"),
+   love.audio.newSource("resources/audio/explosionCrunch_001.ogg", "static"),
+   love.audio.newSource("resources/audio/explosionCrunch_002.ogg", "static"),
+   love.audio.newSource("resources/audio/explosionCrunch_003.ogg", "static"),
+   love.audio.newSource("resources/audio/explosionCrunch_004.ogg", "static"),
+}
+
 local GameObjectState = {
    alive = "alive",
    dying = "dying",
@@ -204,6 +212,11 @@ return {
          end
       }
 
+   end,
+
+   play_explosion = function()
+      local explosion = math.random(1, #explosions)
+      explosions[explosion]:play()
    end,
 
    create_animation = create_animation,

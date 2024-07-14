@@ -99,6 +99,7 @@ return {
 
          if self.health <= 0 and self.state == GameObject.State.alive then
             self.state = GameObject.State.dying
+            GameObject.play_explosion()
          end
 
          if self.state == GameObject.State.dying then

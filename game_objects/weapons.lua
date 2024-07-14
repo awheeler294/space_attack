@@ -1,4 +1,4 @@
-local laser_data = require("resources.game_object_data.lasers")
+local weapon_data = require("resources.game_object_data.lasers")
 local GameObject = require("game_objects.game_object")
 local AnimationState = GameObject.AnimationState
 
@@ -80,23 +80,26 @@ local function build_laser(data, x, y, rotation, sprites)
 
 end
 
-local build_gun = function(x, y, attack_rate, shot_type, sprite_sheet)
+local build_gun = function(x, y, gun_data, shot_type, sprite_sheet)
    return {
       x = x,
       y = y,
 
-      width = 2,
-      height = 2,
+      width = gun_data.width,
+      height = gun_data.height,
 
-      attack_rate = attack_rate,
+      attack_rate = gun_data.attack_rate,
       cooldown = 0,
       rotation = 0,
 
       shot_type = shot_type,
 
+      sound = love.audio.newSource(gun_data.sound, "static"),
+
       maybeAttack = function(self, x_offset, y_offset)
          if self.cooldown <= 0 then
             self.cooldown = self.attack_rate
+            love.audio.play(self.sound)
             return build_laser(
                self.shot_type,
                x_offset + self.x + self.width / 2,
@@ -122,22 +125,11 @@ end
 return {
 
    build_blue_laser_gun = function(x, y, sprite_sheet)
-      local attack_rate = 1/3
-      local shot_type = laser_data.blueLaser
-
-      local gun = build_gun(x, y, attack_rate, shot_type, sprite_sheet)
-
-      return gun
-
+      return build_gun(x, y, weapon_data.LaserGun, weapon_data.BlueLaser, sprite_sheet)
    end,
 
    build_green_laser_gun = function(x, y,  sprite_sheet)
-      local attack_rate = 1/3
-      local shot_type = laser_data.greenLaser
-
-      local gun = build_gun(x, y, attack_rate, shot_type, sprite_sheet)
-
-      return gun
+      return build_gun(x, y, weapon_data.LaserGun, weapon_data.GreenLaser, sprite_sheet)
    end,
 
 }

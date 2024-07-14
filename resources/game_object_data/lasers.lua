@@ -1,7 +1,15 @@
 local sprite_data = require("resources/game_object_data/spritesheet/sheet")
 
 return {
-   blueLaser = {
+   LaserGun = {
+      attack_rate = 1/3,
+      width = 2,
+      height = 2,
+
+      sound = "resources/audio/laserSmall_002.ogg",
+   },
+
+   BlueLaser = {
       speed = 1000,
       health = 1,
       damage = 1,
@@ -17,7 +25,7 @@ return {
          }
    },
 
-   greenLaser = {
+   GreenLaser = {
       speed = 1000,
       health = 1,
       damage = 1,

@@ -82,8 +82,9 @@ local function build_saucer(sprite_data, x, y, sprite_sheet)
 
          self.rotation = (self.rotation + (self.rotation_rate * dt)) % (2 * math.pi)
 
-         if self.health <= 0 then
+         if self.health <= 0 and self.state == GameObject.State.alive then
             self.state = GameObject.State.dying
+            GameObject.play_explosion()
          end
 
          if self.state == GameObject.State.alive then
