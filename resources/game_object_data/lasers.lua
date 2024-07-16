@@ -6,7 +6,7 @@ return {
       width = 2,
       height = 2,
 
-      sound = "resources/audio/laserSmall_002.ogg",
+      sound = love.sound.newSoundData("resources/audio/laserSmall_002.ogg"),
    },
 
    BlueLaser = {

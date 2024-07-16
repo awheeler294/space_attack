@@ -1,40 +1,121 @@
-local GameObject = require("game_objects.game_object")
-local AnimationState = GameObject.AnimationState
-local Weapons = require("game_objects.weapons")
-local Player = require("game_objects.player")
+---Check if a and b collide
+---@param a {x: number, y: number, width: number, height: number}
+---@param b {x: number, y: number, width: number, height: number}
+---@return boolean
+local function checkCollision(a, b)
 
-local function build_saucer(sprite_data, x, y, sprite_sheet)
+   local a = {
+      left = a.x,
+      right = a.x + a.width,
+      top = a.y,
+      bottom = a.y + a.height,
 
-   local speed = 100
-   local health = 1
-   local damage = 1
+      radius = math.min(a.width / 2, a.height / 2),
+      center_x = a.x + a.width / 2,
+      center_y = a.y + a.height / 2,
+   }
 
-   local texture = sprite_data.textures.ufoGreen
-   local texture_quad = love.graphics.newQuad(texture.x, texture.y, texture.width, texture.height, sprite_sheet:getDimensions())
+   local b = {
+      left = b.x,
+      right = b.x + b.width,
+      top = b.y,
+      bottom = b.y + b.height,
 
-   local saucer = GameObject.new(
-      x, y, texture.width, texture.height, speed, health, damage, texture_quad
-   )
+      radius = math.min(b.width / 2, b.height / 2),
+      center_x = b.x + b.width / 2,
+      center_y = b.y + b.height / 2,
+   }
 
-   saucer.direction = 1
-   saucer.rotation = 1
-   saucer.rotation_rate = 6
+   local distance = math.sqrt((b.center_x - a.center_x)^2 + (b.center_y - a.center_y)^2)
 
-   saucer.weapon = Weapons.build_green_laser_gun(
-      saucer.width / 2, 0 - saucer.height, sprite_sheet
-   )
-   saucer.weapon.rotation = math.pi
-   saucer.weapon.attack_rate = math.random(2, 10)
-   saucer.weapon.cooldown = saucer.weapon.attack_rate / 2
+   return  a.right > b.left
+      and a.left < b.right
+      and a.bottom > b.top
+      and a.top < b.bottom
+      and distance < math.max(a.radius, b.radius)
+end
 
-   local e_texture = sprite_data.textures.laserGreen14
-   saucer.dying_animation = {
+local AnimationState = {
+   running = "running",
+   stopped = "stopped",
+}
+
+local function create_animation(frames, width, height, sprite_sheet, frame_rate)
+   local default_frame_rate = 1/30
+
+   local animation = {
+      frames = {},
+      frame_rate = frame_rate or default_frame_rate,
+      frame_elapsed_time = 0,
+
+      width = width,
+      height = height,
+
+      current_frame = 1,
       state = AnimationState.running,
-      frame = love.graphics.newQuad(e_texture.x, e_texture.y, e_texture.width, e_texture.height, sprite_sheet:getDimensions()),
-      width = e_texture.width,
-      height = e_texture.height,
+   }
+
+   for _, texture in ipairs(frames) do
+      table.insert(animation.frames, love.graphics.newQuad(texture.x, texture.y, texture.width, texture.height, sprite_sheet:getDimensions()))
+   end
+
+   animation.update = function(self, dt)
+      if self.state == AnimationState.running then
+
+         self.frame_elapsed_time = self.frame_elapsed_time + dt
+
+         if self.frame_elapsed_time >= self.frame_rate then
+            self.frame_elapsed_time = self.frame_elapsed_time - self.frame_rate
+         end
+
+         self.current_frame = math.floor(self.frame_elapsed_time / self.frame_rate * #self.frames) + 1
+
+      end
+   end
+
+   animation.draw = function(self, x, y)
+      if self.state == AnimationState.running then
+         love.graphics.origin()
+         love.graphics.draw(sprite_sheet, self.frames[self.current_frame], x, y)
+      end
+   end
+
+   return animation
+
+end
+
+local function create_non_looping_animation(frames, width, height, sprite_sheet, frame_rate)
+   local animation = create_animation(frames, width, height, sprite_sheet, frame_rate)
+
+   animation.update = function(self, dt)
+
+      if self.state == AnimationState.running then
+
+         self.frame_elapsed_time = (self.frame_elapsed_time + dt) / self.frame_rate
+
+         self.current_frame = math.floor(self.frame_elapsed_time) + 1
+
+         if self.current_frame > #self.frames then
+               self.state = AnimationState.stopped
+         end
+
+      end
+
+   end
+
+   return animation
+
+end
+
+local function create_scaling_animation(texture, width, sprite_sheet)
+
+   return {
+      state = AnimationState.running,
+      frame = love.graphics.newQuad(texture.x, texture.y, texture.width, texture.height, sprite_sheet:getDimensions()),
+      width = texture.width,
+      height = texture.height,
       scale = .1,
-      scale_max = saucer.width / e_texture.width,
+      scale_max =  width / texture.width,
       scale_rate = 25,
 
       update = function(self, dt)
@@ -51,6 +132,9 @@ local function build_saucer(sprite_data, x, y, sprite_sheet)
       end,
 
       draw = function(self, center_x, center_y, rotation)
+
+         local rotation = rotation or 0
+
          if self.state == AnimationState.running then
             love.graphics.translate(center_x, center_y)
             love.graphics.rotate(rotation)
@@ -65,94 +149,69 @@ local function build_saucer(sprite_data, x, y, sprite_sheet)
          end
       end
    }
-
-   saucer.update = function(self, dt)
-      if self.state ~= GameObject.State.dead then
-
-         local delta_x = speed * dt
-
-         local distance = self.base_x - self.x
-
-         if math.abs(distance) >= self.width then
-            self.base_x = self.x
-            self.direction = self.direction * -1
-         end
-
-         self.x = self.x + delta_x * self.direction
-
-         self.rotation = (self.rotation + (self.rotation_rate * dt)) % (2 * math.pi)
-
-         if self.health <= 0 and self.state == GameObject.State.alive then
-            self.state = GameObject.State.dying
-            GameObject.play_explosion()
-         end
-
-         if self.state == GameObject.State.alive then
-            self.weapon:update(dt)
-         end
-
-         if self.state == GameObject.State.dying then
-
-            self.dying_animation:update(dt)
-
-            if self.dying_animation.state == AnimationState.stopped then
-               self.state = GameObject.State.dead
-            end
-
-         end
-
-      end
-
-   end
-
-   saucer.render = function(self)
-
-      local center_x = self.x + self.width / 2
-      local center_y = self.y + self.height / 2
-
-      -- love.graphics.circle("fill", center_x, center_y, 5)
-
-      love.graphics.translate(center_x, center_y)
-      love.graphics.rotate(self.rotation)
-      love.graphics.draw(sprite_sheet, self.sprite, 0 - self.width / 2, 0 - self.width / 2)
-      love.graphics.origin()
-
-   end
-
-   saucer.draw = function(self)
-      if self.state == GameObject.State.alive then
-
-         self:render()
-
-      elseif self.state == GameObject.State.dying then
-
-         if self.dying_animation.scale_rate > 0 then
-            self:render()
-         end
-
-         local center_x = self.x + self.width / 2
-         local center_y = self.y + self.height / 2
-         -- love.graphics.circle("fill", center_x, center_y, 5)
-         self.dying_animation:draw(center_x, center_y, self.rotation)
-
-      end
-   end
-
-   saucer.maybeAttack = function(self)
-      return self.weapon:maybeAttack(self.x, self.y)
-      -- if self.attack_cooldown <= 0 then
-      --    self.attack_cooldown = self.attack_rate
-      --    return build_laser(laser_data.blueLaser, self.x + self.width / 2, self.y - self.height, sprite_sheet)
-      -- end
-   end
-
-
-   return saucer
-
 end
 
+local GameObjectState = {
+   alive = "alive",
+   dying = "dying",
+   dead = "dead",
+}
+
 return {
-   State = GameObject.State,
-   build_player = Player.build_player,
-   build_saucer = build_saucer,
+
+   new = function (x, y, width, height, speed, health, damage, sprite, dying_sound)
+
+      return {
+         base_x = x,
+         base_y = y,
+
+         x = x,
+         y = y,
+
+         width = width,
+         height = height,
+
+         sprite = sprite,
+
+         shear_x = 0,
+         shear_y = 0,
+
+         speed = speed,
+         health = health,
+         damage = damage,
+
+         state = GameObjectState.alive,
+
+         dying_sound = dying_sound,
+
+         checkCollision = function (self, other)
+            return checkCollision(self, other)
+         end,
+
+         collide = function(self, other)
+            self.health = self.health - other.damage
+            other.health = other.health - self.damage
+         end,
+
+         maybeCollide = function(self, other)
+            if self:checkCollision(other) then
+               self:collide(other)
+            end
+         end,
+
+         maybeAttack = function(_)
+            return false
+         end
+      }
+
+   end,
+
+   create_animation = create_animation,
+   create_non_looping_animation = create_non_looping_animation,
+   create_scaling_animation = create_scaling_animation,
+   AnimationState = AnimationState,
+   State = GameObjectState,
+   Player = require("game_objects.player"),
+   Saucer = require("game_objects.saucer"),
+
 }

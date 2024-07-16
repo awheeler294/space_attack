@@ -1,3 +1,6 @@
 [submodule "debugger"]
 	path = debugger
 	url = https://github.com/slembcke/debugger.lua.git
+[submodule "TESound"]
+	path = TESound
+	url = https://github.com/drhayes/TESound.git

@@ -1,10 +1,13 @@
+require("TESound.tesound")
+
+local Sounds = require("resources.audio.sounds")
 local GameObject = require("game_objects.game_object")
 local AnimationState = GameObject.AnimationState
 local Weapons = require("game_objects.weapons")
 local create_scaling_animation = GameObject.create_scaling_animation
 
 return {
-   build_player = function(sprite_data, sprites)
+   new = function(sprite_data, sprites)
 
       local x = love.graphics.getWidth() / 2
       local y = love.graphics.getHeight() / 1.15
@@ -18,8 +21,10 @@ return {
          texture.x, texture.y, texture.width, texture.height, sprites:getDimensions()
       )
 
+      local dying_sound = Sounds.crunchy_explosions
+
       local player = GameObject.new(
-         x, y, texture.width, texture.height, speed, health, damage, texture_quad
+         x, y, texture.width, texture.height, speed, health, damage, texture_quad, dying_sound
       )
 
       player.dying_animation = create_scaling_animation(sprite_data.textures.laserBlue08, player.width, sprites)
@@ -99,7 +104,7 @@ return {
 
          if self.health <= 0 and self.state == GameObject.State.alive then
             self.state = GameObject.State.dying
-            GameObject.play_explosion()
+            TEsound.play(self.dying_sound, 'static')
          end
 
          if self.state == GameObject.State.dying then

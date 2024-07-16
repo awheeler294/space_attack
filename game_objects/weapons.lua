@@ -94,15 +94,15 @@ local build_gun = function(x, y, gun_data, shot_type, sprite_sheet)
 
       shot_type = shot_type,
 
-      sound = love.audio.newSource(gun_data.sound, "static"),
+      sound = gun_data.sound,
 
       maybeAttack = function(self, x_offset, y_offset)
          if self.cooldown <= 0 then
             self.cooldown = self.attack_rate
-            love.audio.play(self.sound)
+            TEsound.play(self.sound, 'static')
             return build_laser(
                self.shot_type,
-               x_offset + self.x + self.width / 2,
+               x_offset + self.x - self.width / 2,
                y_offset - self.y - self.height,
                self.rotation,
                sprite_sheet

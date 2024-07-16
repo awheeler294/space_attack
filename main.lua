@@ -1,4 +1,5 @@
-local GameObjects = require "game_objects.game_objects"
+require("TESound.tesound")
+local GameObjects = require("game_objects.game_objects")
 
 local backdrop = {}
 
@@ -137,7 +138,7 @@ function love.load()
 
    backdrop.img = love.graphics.newImage("resources/backgrounds/blue.png")
 
-   game_objects:insertPlayer(GameObjects.build_player(sprites.data, sprites.img))
+   game_objects:insertPlayer(GameObjects.Player.new(sprites.data, sprites.img))
 
    local enemy_margin_h = 50
    local enemy_margin_v = 50
@@ -150,7 +151,9 @@ function love.load()
          local x = enemy_margin_h + c * (w * 1.5)
          local y = enemy_margin_v + r * (h * 1.5)
          -- print("x: ", x)
-         table.insert(game_objects.hostiles, GameObjects.build_saucer(sprites.data, x, y, sprites.img))
+         local saucer = GameObjects.Saucer.new(sprites.data, x, y, sprites.img)
+         saucer.weapon.cooldown = saucer.weapon.cooldown + r + c
+         table.insert(game_objects.hostiles, saucer)
       end
    end
 
@@ -163,6 +166,8 @@ function love.update(dt)
    end
 
    game_objects:update(dt)
+
+   TEsound.cleanup()
 
 end
 
