@@ -1,6 +1,6 @@
 local Sounds = require("resources.audio.sounds")
 
-local GameObject = require("game_objects.game_object")
+local GameObject = require("game_objects.game_objects")
 local AnimationState = GameObject.AnimationState
 local Weapons = require("game_objects.weapons")
 
@@ -14,7 +14,7 @@ return {
       local texture = sprite_data.textures.ufoGreen
       local texture_quad = love.graphics.newQuad(texture.x, texture.y, texture.width, texture.height, sprite_sheet:getDimensions())
 
-      local dying_sound = Sounds.low_frequency_explosions
+      local dying_sound = Sounds.laser_explosions
 
       local saucer = GameObject.new(
          x, y, texture.width, texture.height, speed, health, damage, texture_quad, dying_sound
@@ -30,6 +30,7 @@ return {
       saucer.weapon.rotation = math.pi
       saucer.weapon.attack_rate = math.random(2, 10)
       saucer.weapon.cooldown = saucer.weapon.attack_rate / 2
+      saucer.weapon.sound = love.sound.newSoundData("resources/audio/Laser/Laser_09.wav")
 
       local e_texture = sprite_data.textures.laserGreen14
       saucer.dying_animation = {
@@ -88,6 +89,7 @@ return {
 
             if self.health <= 0 and self.state == GameObject.State.alive then
                self.state = GameObject.State.dying
+               TEsound.play(Sounds.low_frequency_explosions, 'static')
                TEsound.play(dying_sound, 'static')
             end
 

@@ -1,75 +1,9 @@
 require("TESound.tesound")
-local GameObjects = require("game_objects.game_objects")
 
-local backdrop = {}
+local World = require("world.world")
+local WorldData = require("resources.game_object_data.worlds")
 
-local game_objects = {
-   player_idx = 0,
-
-   insertPlayer = function(self, player)
-      table.insert(self.friendlies, player)
-      self.player_idx = #self.friendlies
-   end,
-
-   getPlayer = function(self)
-      return self.friendlies[self.player_idx]
-   end,
-
-   friendlies = {},
-   hostiles = {},
-
-   update = function(self, dt)
-
-      for i = #self.friendlies, 1, -1 do
-         local f = self.friendlies[i]
-
-         for _, h in ipairs(self.hostiles) do
-            f:maybeCollide(h)
-         end
-
-         f:update(dt)
-
-         if f.state == GameObjects.State.dead then
-            table.remove(self.friendlies, i)
-         end
-
-         local attack_result = f:maybeAttack()
-         if attack_result then
-            table.insert(self.friendlies, attack_result)
-         end
-
-      end
-
-      for i = #self.hostiles, 1, -1 do
-         local h = self.hostiles[i]
-
-         h:update(dt)
-
-         if h.state == GameObjects.State.dead then
-            table.remove(self.hostiles, i)
-         end
-
-         local attack_result = h:maybeAttack()
-         if attack_result then
-            table.insert(self.hostiles, attack_result)
-         end
-
-      end
-
-   end,
-
-   draw = function(self, sprite_sheet)
-
-      for _, o in ipairs(self.friendlies) do
-         o:draw(sprite_sheet)
-      end
-
-      for _, o in ipairs(self.hostiles) do
-         o:draw(sprite_sheet)
-      end
-
-   end,
-}
+local world = {}
 
 local sprites = {
    debug_draw_blue_lasers = function(self)
@@ -133,29 +67,7 @@ function love.load()
 
    love.graphics.setNewFont(24)
 
-   sprites.data = require("resources/game_object_data/spritesheet/sheet")
-   sprites.img = love.graphics.newImage("resources/game_object_data/spritesheet/" .. sprites.data.image_path)
-
-   backdrop.img = love.graphics.newImage("resources/backgrounds/blue.png")
-
-   game_objects:insertPlayer(GameObjects.Player.new(sprites.data, sprites.img))
-
-   local enemy_margin_h = 50
-   local enemy_margin_v = 50
-
-   local w = sprites.data.textures.ufoGreen.width
-   local h = sprites.data.textures.ufoGreen.height
-
-   for r=1, 3 do
-      for c=1, 10 do
-         local x = enemy_margin_h + c * (w * 1.5)
-         local y = enemy_margin_v + r * (h * 1.5)
-         -- print("x: ", x)
-         local saucer = GameObjects.Saucer.new(sprites.data, x, y, sprites.img)
-         saucer.weapon.cooldown = saucer.weapon.cooldown + r + c
-         table.insert(game_objects.hostiles, saucer)
-      end
-   end
+   world = World.new(WorldData.game_world)
 
 end
 
@@ -165,7 +77,8 @@ function love.update(dt)
        love.event.push('quit')
    end
 
-   game_objects:update(dt)
+   -- local dbg = require 'debugger.debugger'; dbg()
+   world:update(dt)
 
    TEsound.cleanup()
 
@@ -173,13 +86,8 @@ end
 
 function love.draw()
 
-   for y=1, love.graphics.getHeight(), backdrop.img:getHeight() do
-      for x=1, love.graphics.getWidth(), backdrop.img:getWidth() do
-         love.graphics.draw(backdrop.img, x, y)
-      end
-   end
 
-   game_objects:draw(sprites.img)
+   world:draw(sprites.img)
 
    -- sprites:debug_draw_green_lasers()
 

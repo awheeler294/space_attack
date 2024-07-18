@@ -1,5 +1,5 @@
 local weapon_data = require("resources.game_object_data.lasers")
-local GameObject = require("game_objects.game_object")
+local GameObject = require("game_objects.game_objects")
 local AnimationState = GameObject.AnimationState
 
 local function build_laser(data, x, y, rotation, sprites)

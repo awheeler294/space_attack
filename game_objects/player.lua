@@ -1,7 +1,7 @@
 require("TESound.tesound")
 
 local Sounds = require("resources.audio.sounds")
-local GameObject = require("game_objects.game_object")
+local GameObject = require("game_objects.game_objects")
 local AnimationState = GameObject.AnimationState
 local Weapons = require("game_objects.weapons")
 local create_scaling_animation = GameObject.create_scaling_animation
@@ -104,6 +104,7 @@ return {
 
          if self.health <= 0 and self.state == GameObject.State.alive then
             self.state = GameObject.State.dying
+            TEsound.play(Sounds.low_frequency_explosions, 'static')
             TEsound.play(self.dying_sound, 'static')
          end
 

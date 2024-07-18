@@ -211,7 +211,5 @@ return {
    create_scaling_animation = create_scaling_animation,
    AnimationState = AnimationState,
    State = GameObjectState,
-   Player = require("game_objects.player"),
-   Saucer = require("game_objects.saucer"),
 
 }
