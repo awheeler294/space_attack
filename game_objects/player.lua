@@ -1,42 +1,55 @@
 require("TESound.tesound")
 
 local Sounds = require("resources.audio.sounds")
+local Sprites = require("resources.sprites.sprites")
 local GameObject = require("game_objects.game_objects")
 local AnimationState = GameObject.AnimationState
 local Weapons = require("game_objects.weapons")
 local create_scaling_animation = GameObject.create_scaling_animation
 
 return {
-   new = function(sprite_data, sprites)
+   new = function(sprite, x, y)
 
-      local x = love.graphics.getWidth() / 2
-      local y = love.graphics.getHeight() / 1.15
 
       local speed = 600
-      local health = 1
+      local max_health = 4
+      local health = max_health
       local damage = 1
-
-      local texture = sprite_data.textures.playerShip1_blue
-      local texture_quad = love.graphics.newQuad(
-         texture.x, texture.y, texture.width, texture.height, sprites:getDimensions()
-      )
 
       local dying_sound = Sounds.crunchy_explosions
 
       local player = GameObject.new(
-         x, y, texture.width, texture.height, speed, health, damage, texture_quad, dying_sound
+         x, y, speed, health, damage, sprite, dying_sound
       )
 
-      player.dying_animation = create_scaling_animation(sprite_data.textures.laserBlue08, player.width, sprites)
+      player.dying_animation = create_scaling_animation(Sprites.laserBlue08, player.width)
+
       player.weapon = Weapons.build_blue_laser_gun(
-         player.width / 2, player.height, sprites
+         player.width / 2, player.height
       )
+
+      player.max_health = max_health
+
+      player.damage_textures = {
+         Sprites.playerShip1_damage1,
+         Sprites.playerShip1_damage2,
+         Sprites.playerShip1_damage3,
+      }
 
       player.render = function(self)
          love.graphics.translate(self.x, self.y)
          love.graphics.shear(self.shear_x, self.shear_y)
 
-         love.graphics.draw(sprites, self.sprite, 0, 0)
+         love.graphics.draw(self.sprite, 0, 0)
+
+         local health_diff = math.floor(self.max_health - self.health)
+
+         if health_diff > 0 then
+            if health_diff > #self.damage_textures then
+               health_diff = #self.damage_textures
+            end
+            love.graphics.draw(self.damage_textures[health_diff], 0, 0)
+         end
 
          love.graphics.origin()
 
@@ -69,6 +82,8 @@ return {
       end
 
       player.update = function(self, dt)
+
+         self:update_collision(dt)
 
          self.weapon:update(dt)
 

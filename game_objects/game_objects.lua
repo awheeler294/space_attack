@@ -40,11 +40,13 @@ local AnimationState = {
    stopped = "stopped",
 }
 
-local function create_animation(frames, width, height, sprite_sheet, frame_rate)
+local function create_animation(frames, frame_rate)
+   local width = frames[1]:getWidth()
+   local height = frames[1]:getHeight()
    local default_frame_rate = 1/30
 
    local animation = {
-      frames = {},
+      frames = frames,
       frame_rate = frame_rate or default_frame_rate,
       frame_elapsed_time = 0,
 
@@ -54,10 +56,6 @@ local function create_animation(frames, width, height, sprite_sheet, frame_rate)
       current_frame = 1,
       state = AnimationState.running,
    }
-
-   for _, texture in ipairs(frames) do
-      table.insert(animation.frames, love.graphics.newQuad(texture.x, texture.y, texture.width, texture.height, sprite_sheet:getDimensions()))
-   end
 
    animation.update = function(self, dt)
       if self.state == AnimationState.running then
@@ -76,7 +74,7 @@ local function create_animation(frames, width, height, sprite_sheet, frame_rate)
    animation.draw = function(self, x, y)
       if self.state == AnimationState.running then
          love.graphics.origin()
-         love.graphics.draw(sprite_sheet, self.frames[self.current_frame], x, y)
+         love.graphics.draw(self.frames[self.current_frame], x, y)
       end
    end
 
@@ -84,8 +82,8 @@ local function create_animation(frames, width, height, sprite_sheet, frame_rate)
 
 end
 
-local function create_non_looping_animation(frames, width, height, sprite_sheet, frame_rate)
-   local animation = create_animation(frames, width, height, sprite_sheet, frame_rate)
+local function create_non_looping_animation(frames, frame_rate)
+   local animation = create_animation(frames, frame_rate)
 
    animation.update = function(self, dt)
 
@@ -107,15 +105,15 @@ local function create_non_looping_animation(frames, width, height, sprite_sheet,
 
 end
 
-local function create_scaling_animation(texture, width, sprite_sheet)
+local function create_scaling_animation(sprite, width)
 
    return {
       state = AnimationState.running,
-      frame = love.graphics.newQuad(texture.x, texture.y, texture.width, texture.height, sprite_sheet:getDimensions()),
-      width = texture.width,
-      height = texture.height,
+      sprite = sprite,
+      width = sprite:getWidth(),
+      height = sprite:getHeight(),
       scale = .1,
-      scale_max =  width / texture.width,
+      scale_max =  width / sprite:getWidth(),
       scale_rate = 25,
 
       update = function(self, dt)
@@ -140,8 +138,7 @@ local function create_scaling_animation(texture, width, sprite_sheet)
             love.graphics.rotate(rotation)
             love.graphics.scale(self.scale)
             love.graphics.draw(
-               sprite_sheet,
-               self.frame,
+               self.sprite,
                0 - self.width / 2,
                0 - self.width / 2
             )
@@ -159,7 +156,7 @@ local GameObjectState = {
 
 return {
 
-   new = function (x, y, width, height, speed, health, damage, sprite, dying_sound)
+   new = function (x, y, speed, health, damage, sprite, dying_sound)
 
       return {
          base_x = x,
@@ -168,8 +165,8 @@ return {
          x = x,
          y = y,
 
-         width = width,
-         height = height,
+         width = sprite:getWidth(),
+         height = sprite:getHeight(),
 
          sprite = sprite,
 
@@ -184,6 +181,17 @@ return {
 
          dying_sound = dying_sound,
 
+         current_collisions = {},
+
+         update_collision = function(self)
+            for other, _ in pairs(self.current_collisions) do
+               if checkCollision(self, other) == false then
+                  self.current_collisions[other] = nil
+                  other.current_collisions[self] = nil
+               end
+            end
+         end,
+
          checkCollision = function (self, other)
             return checkCollision(self, other)
          end,
@@ -191,11 +199,16 @@ return {
          collide = function(self, other)
             self.health = self.health - other.damage
             other.health = other.health - self.damage
+
+            self.current_collisions[other] = true
+            other.current_collisions[self] = true
          end,
 
-         maybeCollide = function(self, other)
-            if self:checkCollision(other) then
-               self:collide(other)
+         maybeCollide = function(self, other, dt)
+            if self.current_collisions[other] == nil then
+               if self:checkCollision(other) then
+                  self:collide(other, dt)
+               end
             end
          end,
 

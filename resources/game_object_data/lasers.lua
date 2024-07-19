@@ -1,4 +1,4 @@
-local sprite_data = require("resources/game_object_data/spritesheet/sheet")
+local Sprites = require("resources.sprites.sprites")
 
 return {
    LaserGun = {
@@ -15,13 +15,13 @@ return {
       damage = 1,
       range = 2000,
 
-      texture = sprite_data.textures.laserBlue07,
+      sprite = Sprites.laserBlue07,
 
       explode_frames = {
-            sprite_data.textures.laserBlue08,
-            sprite_data.textures.laserBlue08,
-            sprite_data.textures.laserBlue09,
-            sprite_data.textures.laserBlue09,
+            Sprites.laserBlue08,
+            Sprites.laserBlue08,
+            Sprites.laserBlue09,
+            Sprites.laserBlue09,
          }
    },
 
@@ -31,14 +31,13 @@ return {
       damage = 1,
       range = 2000,
 
-      texture = sprite_data.textures.laserGreen13,
+      sprite = Sprites.laserGreen13,
 
       explode_frames = {
-            sprite_data.textures.laserGreen14,
-            sprite_data.textures.laserGreen14,
-            sprite_data.textures.laserGreen15,
-            sprite_data.textures.laserGreen15,
+            Sprites.laserGreen14,
+            Sprites.laserGreen14,
+            Sprites.laserGreen15,
+            Sprites.laserGreen15,
          }
    },
 }
-

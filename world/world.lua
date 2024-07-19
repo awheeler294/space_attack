@@ -2,16 +2,16 @@ require("TESound.tesound")
 local GameObjects = require("game_objects.game_objects")
 local Player = require("game_objects.player")
 local Saucer = require("game_objects.saucer")
+local SaucerData = require("resources.game_object_data.saucers")
 local Backdrop = require("world.backdrop")
 
 return {
    new = function(world_data)
 
-      local sprite_data = require(world_data.sprite_data)
-      local sprite_sheet = love.graphics.newImage("resources/game_object_data/spritesheet/" .. sprite_data.image_path)
+      local sprites = world_data.sprites
 
-      local hostiles = {}
-
+      local p_x = love.graphics.getWidth() / 2
+      local p_y = love.graphics.getHeight() / 1.15
 
       return {
          wave_count = 1,
@@ -19,8 +19,7 @@ return {
          backdrop = Backdrop.new(world_data.backdrop.image_path, world_data.backdrop.speed),
 
          game_objects = {
-
-            player = Player.new(sprite_data, sprite_sheet),
+            player = Player.new(sprites.playerShip1_blue, p_x, p_y),
             friendlies = {},
             hostiles = {},
 
@@ -30,15 +29,17 @@ return {
                local enemy_margin_h = 50
                local enemy_margin_v = 50
 
-               local w = sprite_data.textures.ufoGreen.width
-               local h = sprite_data.textures.ufoGreen.height
+               local saucer_data = SaucerData.green_saucer
+               local sprite = saucer_data.sprite
+               local w = sprite:getWidth()
+               local h = sprite:getHeight()
 
                for r=1, 3 do
                   for c=1, 10 do
                      local x = enemy_margin_h + c * (w * 1.5)
                      local y = enemy_margin_v + r * (h * 1.5)
                      -- print("x: ", x)
-                     local saucer = Saucer.new(sprite_data, x, y, sprite_sheet)
+                     local saucer = Saucer.new(saucer_data, x, y)
                      saucer.weapon.cooldown = saucer.weapon.cooldown + r + c
                      table.insert(game_objects, saucer)
                   end
@@ -64,7 +65,7 @@ return {
                   end
 
                   for _, h in ipairs(self.hostiles) do
-                     f:maybeCollide(h)
+                     f:maybeCollide(h, dt)
                   end
 
                   f:update(dt)
@@ -103,11 +104,11 @@ return {
                self.player:draw()
 
                for _, o in ipairs(self.friendlies) do
-                  o:draw(sprite_sheet)
+                  o:draw()
                end
 
                for _, o in ipairs(self.hostiles) do
-                  o:draw(sprite_sheet)
+                  o:draw()
                end
 
             end,

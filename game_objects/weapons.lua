@@ -2,33 +2,24 @@ local weapon_data = require("resources.game_object_data.lasers")
 local GameObject = require("game_objects.game_objects")
 local AnimationState = GameObject.AnimationState
 
-local function build_laser(data, x, y, rotation, sprites)
-   local speed = data.speed
-   local health = data.health
-   local damage = data.damage
-   local range = data.range
-
-   local texture = data.texture
-
-   local texture_quad = love.graphics.newQuad(texture.x, texture.y, texture.width, texture.height, sprites:getDimensions())
-
+local function build_laser(data, x, y, rotation)
    local laser = GameObject.new(
-      x, y, texture.width, texture.height, speed, health, damage, texture_quad
+      x, y, data.speed, data.health, data.damage, data.sprite
    )
 
-   local explode_frames = data.explode_frames
+   laser.range = data.range
 
-   local e_width = explode_frames[1].width
-   local e_height = explode_frames[1].height
    laser.explode_animation = GameObject.create_non_looping_animation(
-      explode_frames, e_width, e_height, sprites
+      data.explode_frames
    )
 
    laser.rotation = rotation
 
    laser.update = function(self, dt)
 
-      if math.abs(self.y - self.base_y) > range then
+      self:update_collision()
+
+      if math.abs(self.y - self.base_y) > self.range then
          self.health = 0
       end
 
@@ -36,8 +27,8 @@ local function build_laser(data, x, y, rotation, sprites)
 
          if self.health > 0 then
 
-            self.x = self.x + speed * math.sin(self.rotation) * dt
-            self.y = self.y - speed * math.cos(self.rotation) * dt
+            self.x = self.x + self.speed * math.sin(self.rotation) * dt
+            self.y = self.y - self.speed * math.cos(self.rotation) * dt
 
          else
 
@@ -66,7 +57,7 @@ local function build_laser(data, x, y, rotation, sprites)
       love.graphics.rotate(self.rotation)
 
       if self.state == GameObject.State.alive then
-         love.graphics.draw(sprites, self.sprite, 0, 0)
+         love.graphics.draw(self.sprite, 0, 0)
       elseif self.state == GameObject.State.dying then
          local e_x = (self.x + self.width / 2) - (self.explode_animation.width / 2)
          local e_y = (self.y + self.height / 2) - (self.explode_animation.height / 2)
@@ -80,7 +71,7 @@ local function build_laser(data, x, y, rotation, sprites)
 
 end
 
-local build_gun = function(x, y, gun_data, shot_type, sprite_sheet)
+local build_gun = function(x, y, gun_data, shot_type)
    return {
       x = x,
       y = y,
@@ -104,8 +95,7 @@ local build_gun = function(x, y, gun_data, shot_type, sprite_sheet)
                self.shot_type,
                x_offset + self.x - self.width / 2,
                y_offset - self.y - self.height,
-               self.rotation,
-               sprite_sheet
+               self.rotation
             )
          end
       end,
@@ -117,19 +107,20 @@ local build_gun = function(x, y, gun_data, shot_type, sprite_sheet)
       end,
 
       draw = function(self)
-         love.graphics.draw(sprite_sheet, self.shot_type.texture, self.x, self.y)
+         love.graphics.draw(self.shot_type.sprite, self.x, self.y)
       end
    }
 end
 
 return {
 
-   build_blue_laser_gun = function(x, y, sprite_sheet)
-      return build_gun(x, y, weapon_data.LaserGun, weapon_data.BlueLaser, sprite_sheet)
+   build_blue_laser_gun = function(x, y)
+      return build_gun(x, y, weapon_data.LaserGun, weapon_data.BlueLaser)
    end,
 
-   build_green_laser_gun = function(x, y,  sprite_sheet)
-      return build_gun(x, y, weapon_data.LaserGun, weapon_data.GreenLaser, sprite_sheet)
+   build_green_laser_gun = function(x, y)
+      return build_gun(x, y, weapon_data.LaserGun, weapon_data.GreenLaser)
    end,
 
+   build_gun = build_gun,
 }
