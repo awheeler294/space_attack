@@ -23,7 +23,10 @@ return {
             friendlies = {},
             hostiles = {},
 
-            build_wave = function()
+            wave_cooldown = 0,
+
+            build_wave = function(self)
+
                local game_objects = {}
 
                local enemy_margin_h = 50
@@ -45,12 +48,17 @@ return {
                   end
                end
 
-               return game_objects
+               self.hostiles = game_objects
+               self.wave_cooldown = 2
+
             end,
 
             update = function(self, dt)
-               if #self.hostiles == 0 and #self.friendlies == 0 then
-                  self.hostiles = self.build_wave()
+               if #self.hostiles == 0 then
+                  self.wave_cooldown = self.wave_cooldown - dt
+                  if self.wave_cooldown <= 0 then
+                     self:build_wave()
+                  end
                end
 
                for i = #self.friendlies, 0, -1 do
