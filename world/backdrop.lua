@@ -9,21 +9,30 @@ return {
 
    new = function(image_path, speed)
 
-      local backdrop = {
+      return {
          img = love.graphics.newImage(image_path),
-
          speed = speed,
-
+         height = 0,
+         width = 0,
          tiles = {},
 
          update = function(self, dt)
-            for _, t in ipairs(self.tiles) do
-               if t.y > love.graphics.getHeight() then
-                  t.y = t.y - love.graphics.getHeight() - 2 * self.img:getHeight()
+            if love.graphics.getHeight() ~= self.height
+               or love.graphics.getWidth() ~= self.width then
+
+               self.height = love.graphics.getHeight()
+               self.width = love.graphics.getWidth()
+               self:rebuild()
+
+            else
+               for _, t in ipairs(self.tiles) do
+                  if t.y > love.graphics.getHeight() then
+                     t.y = t.y - love.graphics.getHeight() - 2 * self.img:getHeight()
+                  end
+
+                  t.y = t.y + self.speed * dt
+
                end
-
-               t.y = t.y + self.speed * dt
-
             end
          end,
 
@@ -38,16 +47,17 @@ return {
             love.graphics.origin()
          end,
 
-      }
-
-      for y = -2 * backdrop.img:getHeight(), love.graphics.getHeight(), backdrop.img:getHeight() do
-         for x = 0, love.graphics.getWidth(), backdrop.img:getWidth() do
-            local rotaton = rotation_choice[math.random(4)]
-            table.insert(backdrop.tiles, {x = x, y = y, rotation = rotaton})
+         rebuild = function(self)
+            self.tiles = {}
+            for y = -2 * self.img:getHeight(), love.graphics.getHeight(), self.img:getHeight() do
+               for x = 0, love.graphics.getWidth(), self.img:getWidth() do
+                  local rotaton = rotation_choice[math.random(4)]
+                  table.insert(self.tiles, {x = x, y = y, rotation = rotaton})
+               end
+            end
          end
-      end
 
-      return backdrop
+      }
    end,
 
 }
