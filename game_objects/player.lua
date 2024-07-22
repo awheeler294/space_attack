@@ -91,27 +91,27 @@ return {
 
          local shear_x = 0
 
-         if love.keyboard.isDown('d') then
+         if love.keyboard.isDown("right", "d") then
             if self.x < (rs.game_width - self.width - 10) then
                self.x = self.x + (self.speed * dt)
                shear_x = 1
             end
          end
 
-         if love.keyboard.isDown('a') then
+         if love.keyboard.isDown("left", "a") then
             if self.x > 10 then
                self.x = self.x - (self.speed * dt)
                shear_x = -1
             end
          end
 
-         if love.keyboard.isDown('w') then
+         if love.keyboard.isDown("up", "w") then
             if self.y > 10 then
                self.y = self.y - (self.speed * dt)
             end
          end
 
-         if love.keyboard.isDown('s') then
+         if love.keyboard.isDown("down", "s") then
             if self.y < (rs.game_height - self.height - 10) then
                self.y = self.y + (self.speed * dt)
             end
@@ -138,8 +138,10 @@ return {
       end
 
       player.maybeAttack = function(self)
-         if love.keyboard.isDown('space') and self.state == GameObject.State.alive then
-            return self.weapon:maybeAttack(self.x, self.y)
+         if self.state == GameObject.State.alive then
+            if love.keyboard.isDown('space') or love.joystick.isGamepadDown("a", "b", "x", "y")  then
+               return self.weapon:maybeAttack(self.x, self.y)
+            end
          end
 
       end
