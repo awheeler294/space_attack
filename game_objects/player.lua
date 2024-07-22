@@ -1,4 +1,5 @@
 require("TESound.tesound")
+local rs = require("resolution_solution.resolution_solution")
 
 local Sounds = require("resources.audio.sounds")
 local Sprites = require("resources.sprites.sprites")
@@ -37,21 +38,22 @@ return {
       }
 
       player.render = function(self)
-         love.graphics.translate(self.x, self.y)
-         love.graphics.shear(self.shear_x, self.shear_y)
+         love.graphics.push()
+            love.graphics.translate(self.x, self.y)
+            love.graphics.shear(self.shear_x, self.shear_y)
 
-         love.graphics.draw(self.sprite, 0, 0)
+            love.graphics.draw(self.sprite, 0, 0)
 
-         local health_diff = math.floor(self.max_health - self.health)
+            local health_diff = math.floor(self.max_health - self.health)
 
-         if health_diff > 0 then
-            if health_diff > #self.damage_textures then
-               health_diff = #self.damage_textures
+            if health_diff > 0 then
+               if health_diff > #self.damage_textures then
+                  health_diff = #self.damage_textures
+               end
+               love.graphics.draw(self.damage_textures[health_diff], 0, 0)
             end
-            love.graphics.draw(self.damage_textures[health_diff], 0, 0)
-         end
 
-         love.graphics.origin()
+         love.graphics.pop()
 
       end
 
@@ -83,14 +85,14 @@ return {
 
       player.update = function(self, dt)
 
-         self:update_collision(dt)
+         self:update_collision()
 
          self.weapon:update(dt)
 
          local shear_x = 0
 
          if love.keyboard.isDown('d') then
-            if self.x < (love.graphics.getWidth() - self.width - 10) then
+            if self.x < (rs.game_width - self.width - 10) then
                self.x = self.x + (self.speed * dt)
                shear_x = 1
             end
@@ -110,7 +112,7 @@ return {
          end
 
          if love.keyboard.isDown('s') then
-            if self.y < (love.graphics.getHeight() - self.height - 10) then
+            if self.y < (rs.game_height - self.height - 10) then
                self.y = self.y + (self.speed * dt)
             end
          end

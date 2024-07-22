@@ -53,18 +53,18 @@ local function build_laser(data, x, y, rotation)
    end
 
    laser.draw = function(self)
-      love.graphics.translate(self.x + self.width/2, self.y + self.height/2)
-      love.graphics.rotate(self.rotation)
+      love.graphics.push()
+         love.graphics.translate(self.x + self.width/2, self.y + self.height/2)
+         love.graphics.rotate(self.rotation)
 
-      if self.state == GameObject.State.alive then
-         love.graphics.draw(self.sprite, 0, 0)
-      elseif self.state == GameObject.State.dying then
-         local e_x = (self.x + self.width / 2) - (self.explode_animation.width / 2)
-         local e_y = (self.y + self.height / 2) - (self.explode_animation.height / 2)
-         self.explode_animation:draw(e_x, e_y)
-      end
-
-      love.graphics.origin()
+         if self.state == GameObject.State.alive then
+            love.graphics.draw(self.sprite, 0, 0)
+         elseif self.state == GameObject.State.dying then
+            local e_x = (self.width / 2) - (self.explode_animation.width / 2)
+            local e_y = (self.height / 2) - (self.explode_animation.height / 2)
+            self.explode_animation:draw(e_x, e_y)
+         end
+      love.graphics.pop()
    end
 
    return laser

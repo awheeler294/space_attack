@@ -73,7 +73,6 @@ local function create_animation(frames, frame_rate)
 
    animation.draw = function(self, x, y)
       if self.state == AnimationState.running then
-         love.graphics.origin()
          love.graphics.draw(self.frames[self.current_frame], x, y)
       end
    end
@@ -134,15 +133,16 @@ local function create_scaling_animation(sprite, width)
          local rotation = rotation or 0
 
          if self.state == AnimationState.running then
-            love.graphics.translate(center_x, center_y)
-            love.graphics.rotate(rotation)
-            love.graphics.scale(self.scale)
-            love.graphics.draw(
-               self.sprite,
-               0 - self.width / 2,
-               0 - self.width / 2
-            )
-            love.graphics.origin()
+            love.graphics.push()
+               love.graphics.translate(center_x, center_y)
+               love.graphics.rotate(rotation)
+               love.graphics.scale(self.scale)
+               love.graphics.draw(
+                  self.sprite,
+                  0 - self.width / 2,
+                  0 - self.width / 2
+               )
+            love.graphics.pop()
          end
       end
    }

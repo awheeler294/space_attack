@@ -78,10 +78,11 @@ return {
 
          -- love.graphics.circle("fill", center_x, center_y, 5)
 
-         love.graphics.translate(center_x, center_y)
-         love.graphics.rotate(self.rotation)
-         love.graphics.draw(self.sprite, 0 - self.width / 2, 0 - self.width / 2)
-         love.graphics.origin()
+         love.graphics.push()
+            love.graphics.translate(center_x, center_y)
+            love.graphics.rotate(self.rotation)
+            love.graphics.draw(self.sprite, 0 - self.width / 2, 0 - self.width / 2)
+         love.graphics.pop()
 
       end
 

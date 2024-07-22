@@ -4,3 +4,9 @@
 [submodule "TESound"]
 	path = TESound
 	url = https://github.com/drhayes/TESound.git
+[submodule "push"]
+	path = push
+	url = https://github.com/Ulydev/push.git
+[submodule "resolution_solution"]
+	path = resolution_solution
+	url = https://github.com/Vovkiv/resolution_solution.git

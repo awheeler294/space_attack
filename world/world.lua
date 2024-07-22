@@ -4,13 +4,14 @@ local Player = require("game_objects.player")
 local Backdrop = require("world.backdrop")
 local Wave = require("world.wave")
 
+local rs = require("resolution_solution.resolution_solution")
 return {
    new = function(world_data)
 
       local sprites = world_data.sprites
 
-      local p_x = love.graphics.getWidth() / 2
-      local p_y = love.graphics.getHeight() / 1.15
+      local px = rs.game_width / 2
+      local py = rs.game_height / 1.15
 
       return {
          backdrop = Backdrop.new(world_data.backdrop.image_path, world_data.backdrop.speed),
@@ -19,7 +20,7 @@ return {
          wave_cooldown = 0,
 
          game_objects = {
-            player = Player.new(sprites.playerShip1_blue, p_x, p_y),
+            player = Player.new(sprites.playerShip1_blue, px, py),
             friendlies = {},
             hostiles = {},
 
