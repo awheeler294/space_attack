@@ -40,4 +40,36 @@ return {
             Sprites.laserGreen15,
          }
    },
+
+   YellowLaser = {
+      speed = 1250,
+      health = 1,
+      damage = 2,
+      range = 2000,
+
+      sprite = Sprites.laserGreen10,
+
+      explode_frames = {
+            Sprites.laserGreen14,
+            Sprites.laserGreen14,
+            Sprites.laserGreen15,
+            Sprites.laserGreen15,
+         }
+   },
+
+   RedLaser = {
+      speed = 1500,
+      health = 1,
+      damage = 3,
+      range = 2000,
+
+      sprite = Sprites.laserRed07,
+
+      explode_frames = {
+            Sprites.laserRed14,
+            Sprites.laserRed14,
+            Sprites.laserRed15,
+            Sprites.laserRed15,
+         }
+   },
 }

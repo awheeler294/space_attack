@@ -1,9 +1,8 @@
 require("TESound.tesound")
 local GameObjects = require("game_objects.game_objects")
 local Player = require("game_objects.player")
-local Saucer = require("game_objects.saucer")
-local SaucerData = require("resources.game_object_data.saucers")
 local Backdrop = require("world.backdrop")
+local Wave = require("world.wave")
 
 return {
    new = function(world_data)
@@ -14,52 +13,17 @@ return {
       local p_y = love.graphics.getHeight() / 1.15
 
       return {
-         wave_count = 1,
-
          backdrop = Backdrop.new(world_data.backdrop.image_path, world_data.backdrop.speed),
+
+         wave_count = 0,
+         wave_cooldown = 0,
 
          game_objects = {
             player = Player.new(sprites.playerShip1_blue, p_x, p_y),
             friendlies = {},
             hostiles = {},
 
-            wave_cooldown = 0,
-
-            build_wave = function(self)
-
-               local game_objects = {}
-
-               local enemy_margin_h = 50
-               local enemy_margin_v = 50
-
-               local saucer_data = SaucerData.green_saucer
-               local sprite = saucer_data.sprite
-               local w = sprite:getWidth()
-               local h = sprite:getHeight()
-
-               for r=1, 3 do
-                  for c=1, 10 do
-                     local x = enemy_margin_h + c * (w * 1.5)
-                     local y = enemy_margin_v + r * (h * 1.5)
-                     -- print("x: ", x)
-                     local saucer = Saucer.new(saucer_data, x, y)
-                     saucer.weapon.cooldown = saucer.weapon.cooldown + r + c
-                     table.insert(game_objects, saucer)
-                  end
-               end
-
-               self.hostiles = game_objects
-               self.wave_cooldown = 2
-
-            end,
-
             update = function(self, dt)
-               if #self.hostiles == 0 then
-                  self.wave_cooldown = self.wave_cooldown - dt
-                  if self.wave_cooldown <= 0 then
-                     self:build_wave()
-                  end
-               end
 
                for i = #self.friendlies, 0, -1 do
                   local f
@@ -123,6 +87,15 @@ return {
          },
 
          update = function(self, dt)
+            if #self.game_objects.hostiles == 0 then
+               self.wave_cooldown = self.wave_cooldown - dt
+               if self.wave_cooldown <= 0 then
+                  self.wave_count = self.wave_count + 1
+                  self.game_objects.hostiles = Wave.build_wave(self.wave_count)
+                  self.wave_cooldown = 2
+               end
+            end
+
             self.backdrop:update(dt)
             self.game_objects:update(dt)
          end,
