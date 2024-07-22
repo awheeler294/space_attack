@@ -1,26 +1,20 @@
 require("TESound.tesound")
+local rs = require("resolution_solution.resolution_solution")
 
--- local Push = require("push.push")
 local World = require("world.world")
 local WorldData = require("resources.game_object_data.worlds")
 
-
-
--- Setup Resolution Solution.
-local rs = require("resolution_solution.resolution_solution")
-
--- Configure Resolution Solution to 640x480 game with Aspect Scaling mode.
 rs.conf({
     game_width = 1920,
     game_height = 1080,
     scale_mode = rs.ASPECT_MODE
   })
 
--- Make window resizable.
 rs.setMode(rs.game_width, rs.game_height, {resizable = true})
 
--- Change "black" bars color to blue.
-love.graphics.setBackgroundColor(0.3, 0.5, 1)
+-- Change "black" bars color
+-- love.graphics.setBackgroundColor(love.math.colorFromBytes(29, 31, 33))
+love.graphics.setBackgroundColor(love.math.colorFromBytes(38, 39, 43))
 
 -- Setup Resolution Solution canvas, which will be scaled later.
 -- Set canvas to size of game.
@@ -32,23 +26,21 @@ local game_canvas = love.graphics.newCanvas(rs.get_game_size())
 
 -- Update Resolution Solution once window size changes.
 love.resize = function(w, h)
-  rs.resize(w, h)
+   rs.resize(w, h)
 end
 
--- Change scaling mode at runtime.
 love.keypressed = function(key)
-  if key == "f1" then
-    rs.conf({scale_mode = rs.ASPECT_MODE})
-  elseif key == "f2" then
-    rs.conf({scale_mode = rs.STRETCH_MODE})
-  elseif key == "f3" then
-    rs.conf({scale_mode = rs.PIXEL_PERFECT_MODE})
-  elseif key == "f4" then
-    rs.conf({scale_mode = rs.NO_SCALING_MODE})
-  end
+   -- Change scaling mode at runtime.
+   if key == "f1" then
+      rs.conf({scale_mode = rs.ASPECT_MODE})
+   elseif key == "f2" then
+      rs.conf({scale_mode = rs.STRETCH_MODE})
+   elseif key == "f3" then
+      rs.conf({scale_mode = rs.PIXEL_PERFECT_MODE})
+   elseif key == "f4" then
+      rs.conf({scale_mode = rs.NO_SCALING_MODE})
+   end
 end
-
-
 
 local world = {}
 
@@ -115,13 +107,6 @@ function love.load()
    love.graphics.setNewFont(24)
 
    world = World.new(WorldData.game_world)
-
-   -- local gameWidth, gameHeight = 1920, 1200 --fixed game resolution
-   -- local windowWidth, windowHeight = love.window.getDesktopDimensions()
-   -- windowWidth, windowHeight = windowWidth*.7, windowHeight*.7 --make the window a bit smaller than the screen itself
-   --
-   -- Push:setupScreen(gameWidth, gameHeight, windowWidth, windowHeight, {fullscreen = false, resizable = true})
-   -- -- Push:setupScreen(1920, 1080, love.graphics.getWidth(), love.graphics.getHeight(), {fullscreen = false, resizable = true, pixelperfect = true})
 end
 
 function love.update(dt)
@@ -138,41 +123,17 @@ function love.update(dt)
 end
 
 function love.draw()
-   -- Setup canvas.
    love.graphics.setCanvas(game_canvas)
-   -- Clear it to avoid artefacts. Refer to love wiki.
    love.graphics.clear(0, 0, 0, 1)
 
    world:draw(sprites.img)
 
-   -- Print some hints.
-   love.graphics.print("Try to resize window!", 0, 0)
-   love.graphics.print("Press F1, F2, F3, F4 to change scale mode.", 0, 20)
+   -- love.graphics.print("Try to resize window!", 0, 0)
+   -- love.graphics.print("Press F1, F2, F3, F4 to change scale mode.", 0, 20)
 
-  -- Once we done with drawing, lets close canvas.
   love.graphics.setCanvas()
 
-   -- Start scaling.
    rs.push()
-      -- Scale our canvas.
       love.graphics.draw(game_canvas)
-   -- Stop scaling.
    rs.pop()
-
-   -- Push:start()
-
-
-
-   -- world:draw(sprites.img)
-
-   -- sprites:debug_draw_green_lasers()
-
-   -- love.graphics.printf("Hello World", 0, love.graphics.getHeight() / 2 , love.graphics.getWidth(), "center")
-
-   -- Push:finish()
-
 end
-
--- function love.resize(w, h)
---   return Push:resize(w, h)
--- end
