@@ -115,6 +115,10 @@ function love.update(dt)
        love.event.push('quit')
    end
 
+   if love.keyboard.isDown('r') then
+      world = World.new(WorldData.game_world)
+   end
+
    -- local dbg = require 'debugger.debugger'; dbg()
    world:update(dt)
 

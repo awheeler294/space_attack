@@ -9,6 +9,14 @@ return {
       sound = love.sound.newSoundData("resources/audio/laserSmall_002.ogg"),
    },
 
+   LaserGun2 = {
+      attack_rate = 1/6,
+      width = 2,
+      height = 2,
+
+      sound = love.sound.newSoundData("resources/audio/laserSmall_002.ogg"),
+   },
+
    BlueLaser = {
       speed = 1000,
       health = 1,
@@ -16,6 +24,22 @@ return {
       range = 2000,
 
       sprite = Sprites.laserBlue07,
+
+      explode_frames = {
+            Sprites.laserBlue08,
+            Sprites.laserBlue08,
+            Sprites.laserBlue09,
+            Sprites.laserBlue09,
+         }
+   },
+
+   BlueLaser2 = {
+      speed = 1000,
+      health = 1,
+      damage = 2,
+      range = 2000,
+
+      sprite = Sprites.laserBlue16,
 
       explode_frames = {
             Sprites.laserBlue08,

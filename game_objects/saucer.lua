@@ -16,6 +16,8 @@ return {
       saucer.rotation = 1
       saucer.rotation_rate = 6
 
+      saucer.drop_rate = data.drop_rate
+
       saucer.weapon = Weapons.build_gun(
          saucer.width / 2,
          0 - saucer.height,

@@ -14,6 +14,8 @@ return {
       explosion_sprite = Sprites.laserGreen14,
       rotation_rate = 6,
 
+      drop_rate = 50,
+
       weapon = {
          gun = Lasers.LaserGun,
          shot_type = Lasers.GreenLaser,
@@ -37,6 +39,8 @@ return {
       explosion_sprite = Sprites.laserGreen14,
       rotation_rate = 6,
 
+      drop_rate = 10,
+
       weapon = {
          gun = Lasers.LaserGun,
          shot_type = Lasers.YellowLaser,
@@ -59,6 +63,8 @@ return {
       dying_sound = Sounds.laser_explosions,
       explosion_sprite = Sprites.laserRed08,
       rotation_rate = 6,
+
+      drop_rate = 15,
 
       weapon = {
          gun = Lasers.LaserGun,

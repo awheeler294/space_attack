@@ -1,10 +1,12 @@
 require("TESound.tesound")
+local rs = require("resolution_solution.resolution_solution")
+
+local Backdrop = require("world.backdrop")
 local GameObjects = require("game_objects.game_objects")
 local Player = require("game_objects.player")
-local Backdrop = require("world.backdrop")
+local Powerup = require("game_objects.powerups")
 local Wave = require("world.wave")
 
-local rs = require("resolution_solution.resolution_solution")
 return {
    new = function(world_data)
 
@@ -23,7 +25,9 @@ return {
             player = Player.new(sprites.playerShip1_blue, px, py),
             friendlies = {},
             hostiles = {},
+            powerups = {},
 
+            -- Update Friendlies
             update = function(self, dt)
 
                for i = #self.friendlies, 0, -1 do
@@ -32,7 +36,15 @@ return {
                      if self.player.state == GameObjects.State.dead then
                         break
                      end
+
                      f = self.player
+
+                     for _, p in ipairs(self.powerups) do
+                        if f:checkCollision(p) then
+                           f:collide(p)
+                           f:powerup(p.powerup_amount)
+                        end
+                     end
                   else
                      f = self.friendlies[i]
                   end
@@ -54,6 +66,7 @@ return {
 
                end
 
+               -- Update Hostiles
                for i = #self.hostiles, 1, -1 do
                   local h = self.hostiles[i]
 
@@ -61,6 +74,13 @@ return {
 
                   if h.state == GameObjects.State.dead then
                      table.remove(self.hostiles, i)
+
+                     if h.drop_rate then
+                        local drop_chance = math.random(1, 100)
+                        if drop_chance <= h.drop_rate then
+                           table.insert(self.powerups, Powerup.new(h.x + h.width / 2, h.y + h.height / 2))
+                        end
+                     end
                   end
 
                   local attack_result = h:maybeAttack()
@@ -68,6 +88,17 @@ return {
                      table.insert(self.hostiles, attack_result)
                   end
 
+               end
+
+               -- Update Powerups
+               for i = #self.powerups, 1, -1 do
+                  local p = self.powerups[i]
+
+                  p:update(dt)
+
+                  if p.state == GameObjects.State.dead then
+                     table.remove(self.powerups, i)
+                  end
                end
 
             end,
@@ -81,6 +112,10 @@ return {
                end
 
                for _, o in ipairs(self.hostiles) do
+                  o:draw()
+               end
+
+               for _, o in ipairs(self.powerups) do
                   o:draw()
                end
 

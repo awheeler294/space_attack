@@ -1,16 +1,34 @@
 require("TESound.tesound")
 local rs = require("resolution_solution.resolution_solution")
 
+local GameObject = require("game_objects.game_objects")
+local Lasers = require("resources.game_object_data.lasers")
 local Sounds = require("resources.audio.sounds")
 local Sprites = require("resources.sprites.sprites")
-local GameObject = require("game_objects.game_objects")
-local AnimationState = GameObject.AnimationState
 local Weapons = require("game_objects.weapons")
+
+local AnimationState = GameObject.AnimationState
 local create_scaling_animation = GameObject.create_scaling_animation
+
+local powerup_data = {
+   {
+      weapon = Lasers.LaserGun,
+      shot_type = Lasers.BlueLaser,
+   },
+
+   {
+      weapon = Lasers.LaserGun,
+      shot_type = Lasers.BlueLaser2,
+   },
+
+   {
+      weapon = Lasers.LaserGun2,
+      shot_type = Lasers.BlueLaser2,
+   },
+}
 
 return {
    new = function(sprite, x, y)
-
 
       local speed = 600
       local max_health = 4
@@ -25,9 +43,30 @@ return {
 
       player.dying_animation = create_scaling_animation(Sprites.laserBlue08, player.width)
 
-      player.weapon = Weapons.build_blue_laser_gun(
-         player.width / 2, player.height
-      )
+      player.powerup_level = 0
+
+      player.powerup = function(self, power)
+
+         self.powerup_level = self.powerup_level + power
+
+         local power_idx = math.min(self.powerup_level, #powerup_data)
+
+         local new_weapon = Weapons.build_gun (
+            self.width / 2,
+            self.height,
+            powerup_data[power_idx].weapon,
+            powerup_data[power_idx].shot_type
+         )
+
+         if self.weapon then
+            new_weapon.cooldown = self.weapon.cooldown
+         end
+
+         self.weapon = new_weapon
+
+      end
+
+      player:powerup(1)
 
       player.max_health = max_health
 
