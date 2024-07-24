@@ -1,6 +1,7 @@
 require("TESound.tesound")
 local rs = require("resolution_solution.resolution_solution")
 
+local Animation = require("animation")
 local Backdrop = require("world.backdrop")
 local GameObjects = require("game_objects.game_objects")
 local Player = require("game_objects.player")
@@ -21,11 +22,27 @@ return {
          wave_count = 0,
          wave_cooldown = 0,
 
+         text_animations = {
+            update = function(self, dt)
+               for _, animation in ipairs(self) do
+                  animation:update(dt)
+               end
+            end,
+
+            draw = function(self)
+               for _, animation in ipairs(self) do
+                  animation:draw()
+               end
+            end,
+         },
+
          game_objects = {
             player = Player.new(sprites.playerShip1_blue, px, py),
             friendlies = {},
             hostiles = {},
             powerups = {},
+
+            player_won = false,
 
             -- Update Friendlies
             update = function(self, dt)
@@ -123,15 +140,27 @@ return {
          },
 
          update = function(self, dt)
+            if self.player_won == true and #self.text_animations == 0 then
+               table.insert(self.text_animations, Animation.create_text_animation("You Win!"))
+            end
+
             if #self.game_objects.hostiles == 0 then
                self.wave_cooldown = self.wave_cooldown - dt
                if self.wave_cooldown <= 0 then
+
                   self.wave_count = self.wave_count + 1
-                  self.game_objects.hostiles = Wave.build_wave(self.wave_count)
                   self.wave_cooldown = 2
+
+                  self.game_objects.hostiles = Wave.build_wave(self.wave_count)
+
+                  if #self.game_objects.hostiles == 0 then
+                     self.player_won = true
+                  end
+
                end
             end
 
+            self.text_animations:update(dt)
             self.backdrop:update(dt)
             self.game_objects:update(dt)
          end,
@@ -139,6 +168,7 @@ return {
          draw = function(self)
             self.backdrop:draw()
             self.game_objects:draw()
+            self.text_animations:draw()
          end,
       }
    end,

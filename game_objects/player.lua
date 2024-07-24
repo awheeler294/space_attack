@@ -1,14 +1,13 @@
 require("TESound.tesound")
 local rs = require("resolution_solution.resolution_solution")
 
+local Animation = require("animation")
 local GameObject = require("game_objects.game_objects")
 local Lasers = require("resources.game_object_data.lasers")
 local Sounds = require("resources.audio.sounds")
 local Sprites = require("resources.sprites.sprites")
 local Weapons = require("game_objects.weapons")
 
-local AnimationState = GameObject.AnimationState
-local create_scaling_animation = GameObject.create_scaling_animation
 
 local powerup_data = {
    {
@@ -17,12 +16,17 @@ local powerup_data = {
    },
 
    {
-      weapon = Lasers.LaserGun,
-      shot_type = Lasers.BlueLaser2,
+      weapon = Lasers.LaserGun2,
+      shot_type = Lasers.BlueLaser,
    },
 
    {
       weapon = Lasers.LaserGun2,
+      shot_type = Lasers.BlueLaser2,
+   },
+
+   {
+      weapon = Lasers.LaserGun3,
       shot_type = Lasers.BlueLaser2,
    },
 }
@@ -41,7 +45,7 @@ return {
          x, y, speed, health, damage, sprite, dying_sound
       )
 
-      player.dying_animation = create_scaling_animation(Sprites.laserBlue08, player.width)
+      player.dying_animation = Animation.create_scaling_animation(Sprites.laserBlue08, player.width)
 
       player.powerup_level = 0
 
@@ -168,7 +172,7 @@ return {
 
             self.dying_animation:update(dt)
 
-            if self.dying_animation.state == AnimationState.stopped then
+            if self.dying_animation.state == Animation.State.stopped then
                self.state = GameObject.State.dead
             end
 

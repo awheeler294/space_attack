@@ -1,6 +1,7 @@
 local weapon_data = require("resources.game_object_data.lasers")
+
+local Animation = require("animation")
 local GameObject = require("game_objects.game_objects")
-local AnimationState = GameObject.AnimationState
 
 local function build_laser(data, x, y, rotation)
    local laser = GameObject.new(
@@ -9,7 +10,7 @@ local function build_laser(data, x, y, rotation)
 
    laser.range = data.range
 
-   laser.explode_animation = GameObject.create_non_looping_animation(
+   laser.explode_animation = Animation.create_animation(
       data.explode_frames
    )
 
@@ -45,7 +46,7 @@ local function build_laser(data, x, y, rotation)
       end
 
       if self.state == GameObject.State.dying then
-         if self.explode_animation.state == AnimationState.stopped then
+         if self.explode_animation.state == Animation.State.stopped then
             self.state = GameObject.State.dead
          end
       end
@@ -93,7 +94,7 @@ local build_gun = function(x, y, gun_data, shot_type)
             TEsound.play(self.sound, 'static')
             return build_laser(
                self.shot_type,
-               x_offset + self.x - self.width / 2,
+               x_offset + self.x - self.width / 2 - self.shot_type.sprite:getWidth(),
                y_offset - self.y - self.height,
                self.rotation
             )

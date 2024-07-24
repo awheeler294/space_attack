@@ -1,6 +1,7 @@
 
 local GameObject = require("game_objects.game_objects")
 local Sprites = require("resources.sprites.sprites")
+local rs = require("resolution_solution.resolution_solution")
 
 return {
    new = function(x, y)
@@ -24,7 +25,8 @@ return {
          self:update_collision()
          self.y = self.y + self.speed * dt
 
-         if self.health <= 0 then
+         if self.health <= 0
+         or self.y > rs.game_height then
             self.state = GameObject.State.dead
          end
 

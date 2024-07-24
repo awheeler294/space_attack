@@ -1,6 +1,7 @@
 require("TESound.tesound")
 local rs = require("resolution_solution.resolution_solution")
 
+local Fonts = require("resources.fonts.fonts")
 local World = require("world.world")
 local WorldData = require("resources.game_object_data.worlds")
 
@@ -104,7 +105,7 @@ local sprites = {
 function love.load()
    love.window.setTitle("Space Attack!")
 
-   love.graphics.setNewFont(24)
+   love.graphics.setFont(Fonts.normal)
 
    world = World.new(WorldData.game_world)
 end

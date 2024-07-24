@@ -1,19 +1,24 @@
 local Saucer = require("game_objects.saucer")
 local SaucerData = require("resources.game_object_data.saucers")
 
+
+local saucer_type = {
+   SaucerData.green_saucer,
+   SaucerData.yellow_saucer,
+   SaucerData.red_saucer,
+}
+
 return {
    build_wave = function(wave_count)
+
+      if wave_count > #saucer_type then
+         return {}
+      end
 
       local game_objects = {}
 
       local enemy_margin_h = 50
       local enemy_margin_v = 50
-
-      local saucer_type = {
-         SaucerData.green_saucer,
-         SaucerData.yellow_saucer,
-         SaucerData.red_saucer,
-      }
 
       local saucer_data = saucer_type[wave_count]
 

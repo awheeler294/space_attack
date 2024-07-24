@@ -17,6 +17,14 @@ return {
       sound = love.sound.newSoundData("resources/audio/laserSmall_002.ogg"),
    },
 
+   LaserGun3 = {
+      attack_rate = 1/12,
+      width = 2,
+      height = 2,
+
+      sound = love.sound.newSoundData("resources/audio/laserSmall_002.ogg"),
+   },
+
    BlueLaser = {
       speed = 1000,
       health = 1,

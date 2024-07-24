@@ -14,7 +14,7 @@ return {
       explosion_sprite = Sprites.laserGreen14,
       rotation_rate = 6,
 
-      drop_rate = 50,
+      drop_rate = 5,
 
       weapon = {
          gun = Lasers.LaserGun,

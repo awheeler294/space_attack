@@ -1,7 +1,7 @@
 local Sounds = require("resources.audio.sounds")
 
+local Animation = require("animation")
 local GameObject = require("game_objects.game_objects")
-local AnimationState = GameObject.AnimationState
 local Weapons = require("game_objects.weapons")
 
 return {
@@ -29,7 +29,7 @@ return {
       saucer.weapon.cooldown = saucer.weapon.attack_rate / 2
       saucer.weapon.sound = data.weapon.sound
 
-      saucer.dying_animation = GameObject.create_scaling_animation(data.explosion_sprite, saucer.width)
+      saucer.dying_animation = Animation.create_scaling_animation(data.explosion_sprite, saucer.width)
 
       saucer.update = function(self, dt)
          if self.state ~= GameObject.State.dead then
@@ -63,7 +63,7 @@ return {
 
                self.dying_animation:update(dt)
 
-               if self.dying_animation.state == AnimationState.stopped then
+               if self.dying_animation.state == Animation.State.stopped then
                   self.state = GameObject.State.dead
                end
 
