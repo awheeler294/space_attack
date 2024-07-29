@@ -10,7 +10,7 @@ return {
       local health = 1
       local damage = 0
 
-      local sprite = Sprites.powerupBlue
+      local sprite = Sprites.powerupBlue_bolt
 
       local cx = x - sprite:getWidth() / 2
       local cy = y + sprite:getHeight() / 2
