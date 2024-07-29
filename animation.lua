@@ -129,7 +129,9 @@ local function create_text_animation(text)
 
             self.frame_elapsed_time = (self.frame_elapsed_time + dt) / self.frame_rate
 
-            self.current_frame = math.floor(self.frame_elapsed_time) + 1
+            self.current_frame = math.floor(self.frame_elapsed_time)
+
+            self.frame_rate = self.frame_rate - (1/2 * dt)
 
             if self.current_frame > #self.text then
                   self.state = AnimationState.stopped
@@ -139,21 +141,19 @@ local function create_text_animation(text)
       end,
 
       draw = function (self)
-         if self.current_frame > 0 then
-            love.graphics.push()
+         love.graphics.push()
 
-               love.graphics.setFont(Fonts.announce)
+            love.graphics.setFont(Fonts.announce)
 
-               local message = string.sub(self.text, 1, self.current_frame)
-               local message_width = Fonts.announce:getWidth(message)
+            local message = string.sub(self.text, 1, self.current_frame)
+            local message_width = Fonts.announce:getWidth(message)
 
-               local x = rs.game_width / 2 - message_width / 2
-               local y = rs.game_height / 3
+            local x = rs.game_width / 2 - message_width / 2
+            local y = rs.game_height / 3
 
-               love.graphics.printf(message, x, y, message_width, "center")
+            love.graphics.printf(message, x, y, message_width, "center")
 
-            love.graphics.pop()
-         end
+         love.graphics.pop()
       end,
    }
 end
