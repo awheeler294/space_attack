@@ -10,3 +10,6 @@
 [submodule "resolution_solution"]
 	path = resolution_solution
 	url = https://github.com/Vovkiv/resolution_solution.git
+[submodule "Luvent"]
+	path = Luvent
+	url = https://github.com/ejmr/Luvent.git

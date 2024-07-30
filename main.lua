@@ -4,7 +4,6 @@ local rs = require("resolution_solution.resolution_solution")
 local Fonts = require("resources.fonts.fonts")
 local World = require("world.world")
 local WorldData = require("resources.game_object_data.worlds")
-local Menu = require("menu")
 
 rs.conf({
     game_width = 1920,
@@ -31,99 +30,10 @@ love.resize = function(w, h)
    rs.resize(w, h)
 end
 
-local mouse_timer = {
-   vanish_cooldown = 1/10,
-
-   last_x = love.mouse.getX(),
-   last_y = love.mouse.getY(),
-   last_moved = love.timer.getTime(),
-
-   update = function(self)
-      if not love.window.hasFocus() then
-         love.mouse.setVisible(true)
-      else
-         local time = love.timer.getTime()
-
-         local dx = math.abs(love.mouse.getX() - self.last_x)
-         local dy = math.abs(love.mouse.getY() - self.last_y)
-
-         if dx >= 2 then
-            self.last_x = love.mouse.getX()
-            self.last_moved = time
-            love.mouse.setVisible(true)
-         end
-
-         if dy >= 2 then
-            self.last_y = love.mouse.getY()
-            self.last_moved = time
-            love.mouse.setVisible(true)
-         end
-
-         if time - self.last_moved > self.vanish_cooldown then
-            love.mouse.setVisible(false)
-         end
-      end
-   end
-}
-
-local world = {}
-
-local pause = {
-   is_paused = false,
-
-   menu_items = {
-      resume = "Resume",
-      restart = "Restart",
-      quit = "Quit",
-   },
-
-   menu = {},
-
-   set_pause = function(self, val)
-      self.is_paused = val
-
-      if self.is_paused then
-         love.mouse.setVisible(true)
-         self.menu = Menu.new(
-            "Paused",
-            {
-               self.menu_items.resume,
-               self.menu_items.restart,
-               self.menu_items.quit,
-            }
-         )
-      end
-   end,
-
-   handle_keypress = function(self, key)
-      if key == 'escape' then
-         self:set_pause(not self.is_paused)
-      else
-         if self.is_paused then
-            local result = self.menu:handle_keypress(key)
-
-            if result == self.menu_items.resume then
-               self:set_pause(false)
-            end
-
-            if result == self.menu_items.restart then
-               world = World.new(WorldData.game_world)
-               self:set_pause(false)
-            end
-
-            if result == self.menu_items.quit then
-               love.event.push('quit')
-            end
-
-         end
-      end
-   end,
-
-   draw = function(self)
-      if self.is_paused then
-         self.menu:draw()
-      end
-   end,
+local world = {
+   handle_keypress = function(_, _) end,
+   update = function(_) end,
+   draw = function(_) end,
 }
 
 love.keypressed = function(key)
@@ -138,8 +48,11 @@ love.keypressed = function(key)
       rs.conf({scale_mode = rs.NO_SCALING_MODE})
    end
 
-   -- Handle pausing
-   pause:handle_keypress(key)
+   local result = world:handle_keypress(key)
+
+   if result == World.menu_items.restart then
+      world = World.new(WorldData.game_world)
+   end
 end
 
 local sprites = {}
@@ -151,18 +64,12 @@ function love.load()
 
    world = World.new(WorldData.game_world)
 
-   love.mouse.setVisible(false)
 end
 
 function love.update(dt)
 
-   if not pause.is_paused then
-
-      -- local dbg = require 'debugger.debugger'; dbg()
-      world:update(dt)
-
-      mouse_timer:update()
-   end
+   -- local dbg = require 'debugger.debugger'; dbg()
+   world:update(dt)
 
    TEsound.cleanup()
 
@@ -174,7 +81,6 @@ function love.draw()
    love.graphics.clear(0, 0, 0, 1)
 
    world:draw(sprites.img)
-   pause:draw()
 
    -- love.graphics.print("Try to resize window!", 0, 0)
    -- love.graphics.print("Press F1, F2, F3, F4 to change scale mode.", 0, 20)

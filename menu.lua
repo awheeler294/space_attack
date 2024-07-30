@@ -24,6 +24,13 @@ return {
 
          margin = 0,
 
+         is_visible = false,
+
+         set_visible = function(self, val)
+            self.selected_item = 1
+            self.is_visible = val
+         end,
+
          handle_keypress = function(self, key)
 
             if key == "up" then
@@ -46,36 +53,38 @@ return {
          end,
 
          draw = function(self)
-            love.graphics.push("all")
-               love.graphics.setColor(0, 0, 0, .6)
-               love.graphics.rectangle("fill", self.margin, 0, rs.game_width - (self.margin * 2), rs.game_height)
-            love.graphics.pop()
+            if self.is_visible then
+               love.graphics.push("all")
+                  love.graphics.setColor(0, 0, 0, .6)
+                  love.graphics.rectangle("fill", self.margin, 0, rs.game_width - (self.margin * 2), rs.game_height)
+               love.graphics.pop()
 
-            love.graphics.push("all")
+               love.graphics.push("all")
 
-               local title_font = Fonts.announce
-               love.graphics.setColor(1, 1, 1)
+                  local title_font = Fonts.announce
+                  love.graphics.setColor(1, 1, 1)
 
-               local title_y = rs.game_height / 4
+                  local title_y = rs.game_height / 3
 
-               print_centered(self.title, title_y, title_font)
+                  print_centered(self.title, title_y, title_font)
 
-               for i, txt in ipairs(menu_items) do
+                  for i, txt in ipairs(menu_items) do
 
-                  love.graphics.push("all")
-                     local font = Fonts.normal
-                     if i == self.selected_item then
-                        font = Fonts.highlight
-                        love.graphics.setColor(1, 1, 0)
-                     end
+                     love.graphics.push("all")
+                        local font = Fonts.normal
+                        if i == self.selected_item then
+                           font = Fonts.highlight
+                           love.graphics.setColor(1, 1, 0)
+                        end
 
-                     local y = title_y + title_font:getHeight() + (Fonts.normal:getHeight() + 10) * i
+                        local y = title_y + title_font:getHeight() + (Fonts.normal:getHeight() + 10) * i
 
-                     print_centered(txt, y, font)
+                        print_centered(txt, y, font)
 
-                  love.graphics.pop()
-               end
-            love.graphics.pop()
+                     love.graphics.pop()
+                  end
+               love.graphics.pop()
+            end
          end
       }
    end,

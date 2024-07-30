@@ -4,11 +4,27 @@ local rs = require("resolution_solution.resolution_solution")
 local Animation = require("animation")
 local Backdrop = require("world.backdrop")
 local GameObjects = require("game_objects.game_objects")
+local Menu = require("menu")
 local Player = require("game_objects.player")
 local Powerup = require("game_objects.powerups")
 local Wave = require("world.wave")
 
+local menu_items = {
+   resume = "Resume",
+   restart = "Restart",
+   quit = "Quit",
+}
+
+local world_state = {
+   player_won = "Player Won",
+   player_died = "Player Died",
+   running = "Running",
+   paused = "Paused",
+}
+
 return {
+   menu_items = menu_items,
+
    new = function(world_data)
 
       local sprites = world_data.sprites
@@ -16,11 +32,53 @@ return {
       local px = rs.game_width / 2
       local py = rs.game_height / 1.15
 
+      love.mouse.setVisible(false)
+
       return {
+
+         state = world_state.running,
+
          backdrop = Backdrop.new(world_data.backdrop.image_path, world_data.backdrop.speed),
 
          wave_count = 0,
          wave_cooldown = 0,
+
+         mouse_timer = {
+            vanish_cooldown = 1/10,
+
+            last_x = love.mouse.getX(),
+            last_y = love.mouse.getY(),
+            last_moved = love.timer.getTime(),
+
+            update = function(self)
+               if not love.window.hasFocus() then
+                  love.mouse.setVisible(true)
+               else
+                  local time = love.timer.getTime()
+
+                  local dx = math.abs(love.mouse.getX() - self.last_x)
+                  local dy = math.abs(love.mouse.getY() - self.last_y)
+
+                  if dx >= 2 then
+                     self.last_x = love.mouse.getX()
+                     self.last_moved = time
+                     love.mouse.setVisible(true)
+                  end
+
+                  if dy >= 2 then
+                     self.last_y = love.mouse.getY()
+                     self.last_moved = time
+                     love.mouse.setVisible(true)
+                  end
+
+                  if time - self.last_moved > self.vanish_cooldown then
+                     love.mouse.setVisible(false)
+                  end
+               end
+            end
+         },
+
+         pause_menu = Menu.new("Paused", { menu_items.resume, menu_items.restart, menu_items.quit, }),
 
          text_animations = {
             update = function(self, dt)
@@ -41,8 +99,6 @@ return {
             friendlies = {},
             hostiles = {},
             powerups = {},
-
-            player_won = false,
 
             -- Update Friendlies
             update = function(self, dt)
@@ -140,35 +196,86 @@ return {
          },
 
          update = function(self, dt)
-            if self.player_won == true and #self.text_animations == 0 then
-               table.insert(self.text_animations, Animation.create_text_animation("You Win!"))
-            end
+            if self.state ~= world_state.paused then
 
-            if #self.game_objects.hostiles == 0 then
-               self.wave_cooldown = self.wave_cooldown - dt
-               if self.wave_cooldown <= 0 then
+               if #self.game_objects.hostiles == 0 then
+                  self.wave_cooldown = self.wave_cooldown - dt
+                  if self.wave_cooldown <= 0 then
 
-                  self.wave_count = self.wave_count + 1
-                  self.wave_cooldown = 2
+                     self.wave_count = self.wave_count + 1
+                     self.wave_cooldown = 2
 
-                  self.game_objects.hostiles = Wave.build_wave(self.wave_count)
+                     self.game_objects.hostiles = Wave.build_wave(self.wave_count)
 
-                  if #self.game_objects.hostiles == 0 then
-                     self.player_won = true
+                     if self.state ~= world_state.player_won and #self.game_objects.hostiles == 0 then
+                        if not self.text_animations.player_won then
+                           self.text_animations.player_won = true
+                           table.insert(self.text_animations, Animation.create_text_animation("You Win!"))
+                        end
+                        self.pause_menu.title = "You Win!"
+                        self.state = world_state.player_won
+                     end
+
                   end
-
                end
-            end
 
-            self.text_animations:update(dt)
-            self.backdrop:update(dt)
-            self.game_objects:update(dt)
+               if self.state ~= world_state.player_died and self.game_objects.player.health <= 0 then
+                  if not self.text_animations.player_died then
+                     self.text_animations.player_died = true
+                     table.insert(self.text_animations, Animation.create_text_animation("You Died"))
+                  end
+                  self.pause_menu.title = "You Died"
+                  self.state = world_state.player_died
+               end
+
+               self.text_animations:update(dt)
+               self.backdrop:update(dt)
+               self.game_objects:update(dt)
+
+               self.mouse_timer:update()
+
+            end
          end,
 
          draw = function(self)
             self.backdrop:draw()
             self.game_objects:draw()
             self.text_animations:draw()
+
+            self.pause_menu:draw()
+         end,
+
+         handle_keypress = function(self, key)
+            if self.state == world_state.paused then
+               -- local dbg = require 'debugger.debugger'; dbg()
+
+               if key == "escape" then
+                  self.pause_menu:set_visible(false)
+                  self.state = world_state.running
+               else
+                  local result = self.pause_menu:handle_keypress(key)
+
+                  if result == menu_items.resume then
+                     self.pause_menu:set_visible(false)
+                     self.state = world_state.running
+                  end
+
+                  if result == menu_items.quit then
+                     love.event.push('quit')
+                  end
+
+                  return result
+               end
+
+            else
+
+               if key == "escape" then
+                  self.state = world_state.paused
+                  love.mouse.setVisible(true)
+                  self.pause_menu:set_visible(true)
+               end
+
+            end
          end,
       }
    end,

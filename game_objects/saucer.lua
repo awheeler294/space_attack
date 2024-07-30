@@ -38,9 +38,9 @@ return {
 
             local delta_x = self.speed * dt
 
-            local distance = self.base_x - self.x
+            local distance = math.abs(self.base_x - self.x)
 
-            if math.abs(distance) >= self.width then
+            if distance >= self.width then
                self.base_x = self.x
                self.direction = self.direction * -1
             end
