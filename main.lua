@@ -4,6 +4,7 @@ local rs = require("resolution_solution.resolution_solution")
 local Fonts = require("resources.fonts.fonts")
 local World = require("world.world")
 local WorldData = require("resources.game_object_data.worlds")
+local Menu = require("menu")
 
 rs.conf({
     game_width = 1920,
@@ -30,6 +31,101 @@ love.resize = function(w, h)
    rs.resize(w, h)
 end
 
+local mouse_timer = {
+   vanish_cooldown = 1/10,
+
+   last_x = love.mouse.getX(),
+   last_y = love.mouse.getY(),
+   last_moved = love.timer.getTime(),
+
+   update = function(self)
+      if not love.window.hasFocus() then
+         love.mouse.setVisible(true)
+      else
+         local time = love.timer.getTime()
+
+         local dx = math.abs(love.mouse.getX() - self.last_x)
+         local dy = math.abs(love.mouse.getY() - self.last_y)
+
+         if dx >= 2 then
+            self.last_x = love.mouse.getX()
+            self.last_moved = time
+            love.mouse.setVisible(true)
+         end
+
+         if dy >= 2 then
+            self.last_y = love.mouse.getY()
+            self.last_moved = time
+            love.mouse.setVisible(true)
+         end
+
+         if time - self.last_moved > self.vanish_cooldown then
+            love.mouse.setVisible(false)
+         end
+      end
+   end
+}
+
+local world = {}
+
+local pause = {
+   is_paused = false,
+
+   menu_items = {
+      resume = "Resume",
+      restart = "Restart",
+      quit = "Quit",
+   },
+
+   menu = {},
+
+   set_pause = function(self, val)
+      self.is_paused = val
+
+      if self.is_paused then
+         love.mouse.setVisible(true)
+         self.menu = Menu.new(
+            "Paused",
+            {
+               self.menu_items.resume,
+               self.menu_items.restart,
+               self.menu_items.quit,
+            }
+         )
+      end
+   end,
+
+   handle_keypress = function(self, key)
+      if key == 'escape' then
+         self:set_pause(not self.is_paused)
+      else
+         if self.is_paused then
+            local result = self.menu:handle_keypress(key)
+
+            if result == self.menu_items.resume then
+               self:set_pause(false)
+            end
+
+            if result == self.menu_items.restart then
+               world = World.new(WorldData.game_world)
+               self:set_pause(false)
+            end
+
+            if result == self.menu_items.quit then
+               love.event.push('quit')
+            end
+
+         end
+      end
+   end,
+
+   draw = function(self)
+      if self.is_paused then
+         self.menu:draw()
+      end
+   end,
+}
+
 love.keypressed = function(key)
    -- Change scaling mode at runtime.
    if key == "f1" then
@@ -41,66 +137,12 @@ love.keypressed = function(key)
    elseif key == "f4" then
       rs.conf({scale_mode = rs.NO_SCALING_MODE})
    end
+
+   -- Handle pausing
+   pause:handle_keypress(key)
 end
 
-local world = {}
-
-local sprites = {
-   debug_draw_blue_lasers = function(self)
-      self:debug_draw({
-         self.data.textures.laserBlue01,
-         self.data.textures.laserBlue02,
-         self.data.textures.laserBlue03,
-         self.data.textures.laserBlue04,
-         self.data.textures.laserBlue05,
-         self.data.textures.laserBlue06,
-         self.data.textures.laserBlue07,
-         self.data.textures.laserBlue08,
-         self.data.textures.laserBlue09,
-         self.data.textures.laserBlue10,
-         self.data.textures.laserBlue11,
-         self.data.textures.laserBlue12,
-         self.data.textures.laserBlue13,
-         self.data.textures.laserBlue14,
-         self.data.textures.laserBlue15,
-         self.data.textures.laserBlue16,
-      })
-   end,
-
-   debug_draw_green_lasers = function(self)
-      self:debug_draw({
-         self.data.textures.laserGreen01,
-         self.data.textures.laserGreen02,
-         self.data.textures.laserGreen03,
-         self.data.textures.laserGreen04,
-         self.data.textures.laserGreen05,
-         self.data.textures.laserGreen06,
-         self.data.textures.laserGreen07,
-         self.data.textures.laserGreen08,
-         self.data.textures.laserGreen09,
-         self.data.textures.laserGreen10,
-         self.data.textures.laserGreen11,
-         self.data.textures.laserGreen12,
-         self.data.textures.laserGreen13,
-         self.data.textures.laserGreen14,
-         self.data.textures.laserGreen15,
-         self.data.textures.laserGreen16,
-      })
-   end,
-
-   debug_draw = function(self, textures)
-      for i, texture in ipairs(textures) do
-
-         love.graphics.setColor(1, 1, 1)
-         local frame = love.graphics.newQuad(texture.x, texture.y, texture.width, texture.height, self.img:getDimensions())
-         local x = 100 * i
-         local y = 1000
-         love.graphics.print("" .. i, x, y - 50)
-         love.graphics.draw(self.img, frame, x, y)
-      end
-   end,
-}
-
+local sprites = {}
 
 function love.load()
    love.window.setTitle("Space Attack!")
@@ -108,30 +150,31 @@ function love.load()
    love.graphics.setFont(Fonts.normal)
 
    world = World.new(WorldData.game_world)
+
+   love.mouse.setVisible(false)
 end
 
 function love.update(dt)
 
-   if love.keyboard.isDown('escape') then
-       love.event.push('quit')
-   end
+   if not pause.is_paused then
 
-   if love.keyboard.isDown('r') then
-      world = World.new(WorldData.game_world)
-   end
+      -- local dbg = require 'debugger.debugger'; dbg()
+      world:update(dt)
 
-   -- local dbg = require 'debugger.debugger'; dbg()
-   world:update(dt)
+      mouse_timer:update()
+   end
 
    TEsound.cleanup()
 
 end
 
 function love.draw()
+
    love.graphics.setCanvas(game_canvas)
    love.graphics.clear(0, 0, 0, 1)
 
    world:draw(sprites.img)
+   pause:draw()
 
    -- love.graphics.print("Try to resize window!", 0, 0)
    -- love.graphics.print("Press F1, F2, F3, F4 to change scale mode.", 0, 20)

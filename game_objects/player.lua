@@ -182,14 +182,17 @@ return {
 
       player.maybeAttack = function(self)
          if self.state == GameObject.State.alive then
+
             for _, j in ipairs(love.joystick.getJoysticks()) do
 		if j:isGamepadDown("a", "b", "x", "y") then
 		   return self.weapon:maybeAttack(self.x, self.y)
 		end
 	    end
+
             if love.keyboard.isDown('space') then
                return self.weapon:maybeAttack(self.x, self.y)
             end
+
          end
 
       end
