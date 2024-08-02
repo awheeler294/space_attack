@@ -4,6 +4,7 @@ local rs = require("resolution_solution.resolution_solution")
 local Animation = require("animation")
 local GameObject = require("game_objects.game_objects")
 local Lasers = require("resources.game_object_data.lasers")
+local Shield = require("game_objects.shield")
 local Sounds = require("resources.audio.sounds")
 local Sprites = require("resources.sprites.sprites")
 local Weapons = require("game_objects.weapons")
@@ -42,7 +43,7 @@ return {
       local dying_sound = Sounds.crunchy_explosions
 
       local player = GameObject.new(
-         x, y, speed, health, damage, sprite, dying_sound
+         x, y, speed, health, damage, sprite, dying_sound, Shield.new(x, y)
       )
 
       player.dying_animation = Animation.create_scaling_animation(Sprites.laserBlue08, player.width)
@@ -97,6 +98,10 @@ return {
             end
 
          love.graphics.pop()
+
+         if self.shield and self.shield.health > 0 then
+            self.shield:draw()
+         end
 
       end
 
@@ -160,6 +165,10 @@ return {
             end
          end
 
+         if self.shield then
+            self.shield:update(self)
+         end
+
          self.shear_x = shear_x / 20
 
          if self.health <= 0 and self.state == GameObject.State.alive then
@@ -184,10 +193,10 @@ return {
          if self.state == GameObject.State.alive then
 
             for _, j in ipairs(love.joystick.getJoysticks()) do
-		if j:isGamepadDown("a", "b", "x", "y") then
-		   return self.weapon:maybeAttack(self.x, self.y)
-		end
-	    end
+               if j:isGamepadDown("a", "b", "x", "y") then
+                  return self.weapon:maybeAttack(self.x, self.y)
+               end
+            end
 
             if love.keyboard.isDown('space') then
                return self.weapon:maybeAttack(self.x, self.y)

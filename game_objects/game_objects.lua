@@ -4,7 +4,7 @@
 ---@return boolean
 local function checkCollision(a, b)
 
-   local a = {
+   local lhs = {
       left = a.x,
       right = a.x + a.width,
       top = a.y,
@@ -15,7 +15,7 @@ local function checkCollision(a, b)
       center_y = a.y + a.height / 2,
    }
 
-   local b = {
+   local rhs = {
       left = b.x,
       right = b.x + b.width,
       top = b.y,
@@ -26,13 +26,13 @@ local function checkCollision(a, b)
       center_y = b.y + b.height / 2,
    }
 
-   local distance = math.sqrt((b.center_x - a.center_x)^2 + (b.center_y - a.center_y)^2)
+   local distance = math.sqrt((rhs.center_x - lhs.center_x)^2 + (rhs.center_y - lhs.center_y)^2)
 
-   return  a.right > b.left
-      and a.left < b.right
-      and a.bottom > b.top
-      and a.top < b.bottom
-      and distance < math.max(a.radius, b.radius)
+   return  lhs.right > rhs.left
+      and lhs.left < rhs.right
+      and lhs.bottom > rhs.top
+      and lhs.top < rhs.bottom
+      and distance < math.max(lhs.radius, rhs.radius)
 end
 
 local GameObjectState = {
@@ -43,7 +43,7 @@ local GameObjectState = {
 
 return {
 
-   new = function (x, y, speed, health, damage, sprite, dying_sound)
+   new = function (x, y, speed, health, damage, sprite, dying_sound, shield)
 
       return {
          base_x = x,
@@ -68,34 +68,63 @@ return {
 
          dying_sound = dying_sound,
 
+         shield = shield,
+
          current_collisions = {},
 
          update_collision = function(self)
+            local my_collision = self
+            if self.shield and self.shield.health > 0 then
+               my_collision = self.shield
+            end
+
             for other, _ in pairs(self.current_collisions) do
-               if checkCollision(self, other) == false then
+               local other_collision = other
+
+               if other.shield and other.shield.health > 0 then
+                  other_collision = other.shield
+               end
+
+               if checkCollision(my_collision, other_collision) == false then
+                  -- print("Not Colliding", self, other)
                   self.current_collisions[other] = nil
                   other.current_collisions[self] = nil
                end
+
             end
          end,
 
-         checkCollision = function (self, other)
-            return checkCollision(self, other)
+         check_collision = function (self, other)
+            if self.current_collisions[other] == nil then
+               if self.shield and self.shield.health > 0 then
+                  return checkCollision(self.shield, other)
+               end
+
+               return checkCollision(self, other)
+            end
          end,
 
          collide = function(self, other)
-            self.health = self.health - other.damage
-            other.health = other.health - self.damage
+            local this = self
+            if self.shield and self.shield.health > 0 then
+               this = self.shield
+               -- print("Shield health: ", shield.health, "Other damage: ", other.damage, "Self: ", self, "Other: ", other)
+            end
+
+            this.health = this.health - other.damage
+            other.health = other.health - this.damage
+
+            -- if self.shield then
+            --    print("Shield health: ", shield.health)
+            -- end
 
             self.current_collisions[other] = true
             other.current_collisions[self] = true
          end,
 
          maybeCollide = function(self, other, dt)
-            if self.current_collisions[other] == nil then
-               if self:checkCollision(other) then
-                  self:collide(other, dt)
-               end
+            if self:check_collision(other) then
+               self:collide(other, dt)
             end
          end,
 

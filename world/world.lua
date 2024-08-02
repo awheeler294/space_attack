@@ -29,10 +29,12 @@ return {
 
       local sprites = world_data.sprites
 
+      love.mouse.setVisible(false)
+
       local px = rs.game_width / 2
       local py = rs.game_height / 1.15
 
-      love.mouse.setVisible(false)
+      local player = Player.new(sprites.playerShip1_blue, px, py)
 
       return {
 
@@ -95,7 +97,7 @@ return {
          },
 
          game_objects = {
-            player = Player.new(sprites.playerShip1_blue, px, py),
+            player = player,
             friendlies = {},
             hostiles = {},
             powerups = {},
@@ -113,7 +115,7 @@ return {
                      f = self.player
 
                      for _, p in ipairs(self.powerups) do
-                        if f:checkCollision(p) then
+                        if f:check_collision(p) then
                            f:collide(p)
                            f:powerup(p.powerup_amount)
                         end
@@ -123,6 +125,7 @@ return {
                   end
 
                   for _, h in ipairs(self.hostiles) do
+                     -- local dbg = require 'debugger.debugger'; dbg()
                      f:maybeCollide(h, dt)
                   end
 
@@ -247,7 +250,6 @@ return {
 
          handle_keypress = function(self, key)
             if self.state == world_state.paused then
-               -- local dbg = require 'debugger.debugger'; dbg()
 
                if key == "escape" then
                   self.pause_menu:set_visible(false)
