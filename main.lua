@@ -1,5 +1,5 @@
-require("TESound.tesound")
-local rs = require("resolution_solution.resolution_solution")
+require "TESound.tesound"
+local rs = require "resolution_solution.resolution_solution"
 
 local Fonts = require("resources.fonts.fonts")
 local World = require("world.world")

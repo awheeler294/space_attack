@@ -2,6 +2,7 @@ local Sounds = require("resources.audio.sounds")
 
 local Animation = require("animation")
 local GameObject = require("game_objects.game_objects")
+local MovementProfiles = require("game_objects.movement_profiles")
 local Weapons = require("game_objects.weapons")
 
 return {
@@ -15,6 +16,8 @@ return {
       saucer.direction = 1
       saucer.rotation = 1
       saucer.rotation_rate = 6
+
+      saucer.movement_profile = MovementProfiles.side_to_side.new(x)
 
       saucer.drop_rate = data.drop_rate
 
@@ -36,16 +39,7 @@ return {
 
             self:update_collision()
 
-            local delta_x = self.speed * dt
-
-            local distance = math.abs(self.base_x - self.x)
-
-            if distance >= self.width then
-               self.base_x = self.x
-               self.direction = self.direction * -1
-            end
-
-            self.x = self.x + delta_x * self.direction
+            self.x, self.y = self.movement_profile:update(self, dt)
 
             self.rotation = (self.rotation + (self.rotation_rate * dt)) % (2 * math.pi)
 

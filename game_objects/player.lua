@@ -1,9 +1,10 @@
-require("TESound.tesound")
-local rs = require("resolution_solution.resolution_solution")
+require "TESound.tesound"
+local rs = require "resolution_solution.resolution_solution"
 
 local Animation = require("animation")
 local GameObject = require("game_objects.game_objects")
 local Lasers = require("resources.game_object_data.lasers")
+local MovementProfiles = require("game_objects.movement_profiles")
 local Shield = require("game_objects.shield")
 local Sounds = require("resources.audio.sounds")
 local Sprites = require("resources.sprites.sprites")
@@ -47,6 +48,8 @@ return {
       )
 
       player.dying_animation = Animation.create_scaling_animation(Sprites.laserBlue08, player.width)
+
+      player.movement_porfile = MovementProfiles.human_control.new()
 
       player.powerup_level = 0
 
@@ -137,39 +140,11 @@ return {
 
          self.weapon:update(dt)
 
-         local shear_x = 0
-
-         if love.keyboard.isDown("right", "d") then
-            if self.x < (rs.game_width - self.width - 10) then
-               self.x = self.x + (self.speed * dt)
-               shear_x = 1
-            end
-         end
-
-         if love.keyboard.isDown("left", "a") then
-            if self.x > 10 then
-               self.x = self.x - (self.speed * dt)
-               shear_x = -1
-            end
-         end
-
-         if love.keyboard.isDown("up", "w") then
-            if self.y > 10 then
-               self.y = self.y - (self.speed * dt)
-            end
-         end
-
-         if love.keyboard.isDown("down", "s") then
-            if self.y < (rs.game_height - self.height - 10) then
-               self.y = self.y + (self.speed * dt)
-            end
-         end
+         self.x, self.y, self.shear_x = self.movement_porfile:update(self, dt)
 
          if self.shield then
             self.shield:update(self)
          end
-
-         self.shear_x = shear_x / 20
 
          if self.health <= 0 and self.state == GameObject.State.alive then
             self.state = GameObject.State.dying
