@@ -85,6 +85,7 @@ local circle_wave = function(danger_level, circle_count, ring_count)
       local center_x = circle * (rs.game_width / (circle_count + 1)) - w / 2
 
       local center_saucer = Saucer.new(saucer_data, center_x, center_y)
+      center_saucer.movement_profile = MovementProfiles.stationary.new()
       table.insert(game_objects, center_saucer)
 
       for ring = 1, ring_count do
@@ -111,18 +112,18 @@ local circle_wave = function(danger_level, circle_count, ring_count)
 end
 
 local waves = {
-   {
-      build = function()
-         local danger_level = 1
-         return block_wave(danger_level, 3)
-      end,
-   },
-   {
-      build = function()
-         local danger_level = 1
-         return transverse_block_wave(danger_level, 3)
-      end,
-   },
+   -- {
+   --    build = function()
+   --       local danger_level = 1
+   --       return block_wave(danger_level, 3)
+   --    end,
+   -- },
+   -- {
+   --    build = function()
+   --       local danger_level = 1
+   --       return transverse_block_wave(danger_level, 3)
+   --    end,
+   -- },
    {
       build = function()
          local danger_level = 1

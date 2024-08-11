@@ -3,6 +3,16 @@ local rs = require "resolution_solution.resolution_solution"
 local two_pi = math.pi * 2
 
 return {
+   stationary = {
+      new = function()
+         return {
+            update = function(_, game_object)
+               return game_object.x, game_object.y
+            end,
+         }
+      end,
+   },
+
    human_control = {
       new = function()
          return {
