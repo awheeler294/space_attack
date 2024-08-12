@@ -35,30 +35,53 @@ local function checkCollision(a, b)
       and distance < math.max(lhs.radius, rhs.radius)
 end
 
+---@enum GameObjectState
 local GameObjectState = {
    alive = "alive",
    dying = "dying",
    dead = "dead",
 }
 
+---@class GameObject
+---@field x number objects current horizontal position
+---@field y number objects current vertical position
+---@field base_x number objects initial horizontal position, for distance calculations
+---@field base_y number objects initial vertical position, for distance calculations
+---@field width number
+---@field height number
+---@field speed number
+---@field health number amount of damage this object can take before being destroyed
+---@field damage number ammount of damage this objects inflicts on another object when they collide
+---@field sprite love.ImageData
+---@field state GameObjectState
+---@field dying_sound? love.SoundData
+---@field shield? Shield
+---@field current_collisions GameObject[] 
 return {
 
+   ---Construct a new GameObject
+   ---@param x number Initial x position
+   ---@param y number Initial y position
+   ---@param speed number
+   ---@param health number
+   ---@param damage number
+   ---@param sprite love.ImageData
+   ---@param dying_sound? love.SoundData
+   ---@param shield? Shield
+   ---@return GameObject
    new = function (x, y, speed, health, damage, sprite, dying_sound, shield)
 
       return {
-         base_x = x,
-         base_y = y,
-
          x = x,
          y = y,
+
+         base_x = x,
+         base_y = y,
 
          width = sprite:getWidth(),
          height = sprite:getHeight(),
 
          sprite = sprite,
-
-         shear_x = 0,
-         shear_y = 0,
 
          speed = speed,
          health = health,
@@ -72,6 +95,18 @@ return {
 
          current_collisions = {},
 
+         update = function(self, dt)
+            self:update_collision()
+            print("Base GameObject update function called. Each type of GameObject should implement it's own update function", dt)
+         end,
+
+         draw = function(self)
+            print("Base GameObject draw function called. Each type of GameObject should implement it's own draw function", self)
+         end,
+
+         ---Checks if this object is still colliding with objects in it's `current_collisions` list.
+         ---This function should be called in each objects `update()` function
+         ---@param self GameObject
          update_collision = function(self)
             local my_collision = self
             if self.shield and self.shield.health > 0 then

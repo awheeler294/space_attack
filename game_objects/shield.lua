@@ -17,6 +17,7 @@ local ShieldData = {
    }
 }
 
+---@class Shield: GameObject
 return {
    new = function(x, y, rotation)
       local sprite = ShieldData.sprites[math.min(ShieldData.health, #ShieldData.sprites)]

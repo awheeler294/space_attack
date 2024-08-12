@@ -47,6 +47,9 @@ return {
          x, y, speed, health, damage, sprite, dying_sound, Shield.new(x, y)
       )
 
+      player.shear_x = 0
+      player.shear_y = 0
+
       player.dying_animation = Animation.create_scaling_animation(Sprites.laserBlue08, player.width)
 
       player.movement_porfile = MovementProfiles.human_control.new()
