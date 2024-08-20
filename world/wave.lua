@@ -112,18 +112,18 @@ local circle_wave = function(danger_level, circle_count, ring_count)
 end
 
 local waves = {
-   -- {
-   --    build = function()
-   --       local danger_level = 1
-   --       return block_wave(danger_level, 3)
-   --    end,
-   -- },
-   -- {
-   --    build = function()
-   --       local danger_level = 1
-   --       return transverse_block_wave(danger_level, 3)
-   --    end,
-   -- },
+   {
+      build = function()
+         local danger_level = 1
+         return block_wave(danger_level, 3)
+      end,
+   },
+   {
+      build = function()
+         local danger_level = 1
+         return transverse_block_wave(danger_level, 3)
+      end,
+   },
    {
       build = function()
          local danger_level = 1
