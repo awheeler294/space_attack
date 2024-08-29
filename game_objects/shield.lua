@@ -5,6 +5,7 @@ local Sprites = require("resources.sprites.sprites")
 local ShieldData = {
    speed = 0,
    health = 3,
+   max_health = 3,
    damage = 1,
    dying_sound = Sounds.laser_explosions,
    x_offset = 0,
@@ -17,7 +18,6 @@ local ShieldData = {
    }
 }
 
----@class Shield: GameObject
 return {
    new = function(x, y, rotation)
       local sprite = ShieldData.sprites[math.min(ShieldData.health, #ShieldData.sprites)]
@@ -33,6 +33,8 @@ return {
       )
 
       shield.rotation = rotation or 0
+
+      shield.max_health = ShieldData.max_health
 
       shield.update = function (self, shielded_object)
          self.x = shielded_object.x + ShieldData.x_offset + shielded_object.width / 2 - self.sprite:getWidth() / 2

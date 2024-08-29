@@ -52,13 +52,31 @@ return {
 
       player.dying_animation = Animation.create_scaling_animation(Sprites.laserBlue08, player.width)
 
+      player.damage_textures = {
+         Sprites.playerShip1_damage1,
+         Sprites.playerShip1_damage2,
+         Sprites.playerShip1_damage3,
+      }
+
       player.movement_porfile = MovementProfiles.human_control.new()
+
+      player.max_health = max_health
 
       player.powerup_level = 0
 
       player.powerup = function(self, power)
 
-         self.powerup_level = self.powerup_level + power
+         while power > 0 do
+            if self.health < self.max_health then
+               self.health = self.health + 1
+            elseif self.shield.health < self.shield.max_health then
+               self.shield.health = self.shield.health + 1
+            elseif self.powerup_level < #powerup_data then
+               self.powerup_level = self.powerup_level + 1
+            end
+
+            power = power - 1
+         end
 
          local power_idx = math.min(self.powerup_level, #powerup_data)
 
@@ -78,14 +96,6 @@ return {
       end
 
       player:powerup(1)
-
-      player.max_health = max_health
-
-      player.damage_textures = {
-         Sprites.playerShip1_damage1,
-         Sprites.playerShip1_damage2,
-         Sprites.playerShip1_damage3,
-      }
 
       player.render = function(self)
          love.graphics.push()

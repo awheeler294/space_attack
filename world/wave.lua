@@ -122,13 +122,22 @@ local waves = {
    {
       build = function()
          local danger_level = 1
-         return block_wave(danger_level, 3)
+         local rows = 3
+         return block_wave(danger_level, rows)
       end,
    },
    {
       build = function()
          local danger_level = 1
-         return transverse_block_wave(danger_level, 3)
+         local rows = 3
+         return transverse_block_wave(danger_level, rows)
+      end,
+   },
+   {
+      build = function()
+         local danger_level = 2
+         local rows = 3
+         return transverse_block_wave(danger_level, rows)
       end,
    },
    {
@@ -150,13 +159,15 @@ local waves = {
    {
       build = function()
          local danger_level = 2
-         return transverse_block_wave(danger_level, 3)
+         local rows = 3
+         return block_wave(danger_level, rows)
       end,
    },
    {
       build = function()
-         local danger_level = 2
-         return block_wave(danger_level, 3)
+         local danger_level = 3
+         local rows = 3
+         return transverse_block_wave(danger_level, rows)
       end,
    },
    {
@@ -178,13 +189,8 @@ local waves = {
    {
       build = function()
          local danger_level = 3
-         return transverse_block_wave(danger_level, 3)
-      end,
-   },
-   {
-      build = function()
-         local danger_level = 3
-         return block_wave(danger_level, 3)
+         local rows = 3
+         return block_wave(danger_level, rows)
       end,
    },
    {
@@ -206,19 +212,22 @@ local waves = {
    {
       build = function()
          local danger_level = 3
-         return transverse_block_wave(danger_level, 4)
+         local rows = 4
+         return transverse_block_wave(danger_level, rows)
       end,
    },
    {
       build = function()
          local danger_level = 3
-         return transverse_block_wave(danger_level, 5)
+         local rows = 5
+         return transverse_block_wave(danger_level, rows)
       end,
    },
    {
       build = function()
          local danger_level = 3
-         return transverse_block_wave(danger_level, 6)
+         local rows = 6
+         return transverse_block_wave(danger_level, rows)
       end,
    },
    {

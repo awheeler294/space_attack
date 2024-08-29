@@ -6,7 +6,7 @@ local rs = require("resolution_solution.resolution_solution")
 return {
    new = function(x, y)
 
-      local speed = 500
+      local speed = 300
       local health = 1
       local damage = 0
 
