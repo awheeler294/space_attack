@@ -22,7 +22,7 @@ return {
       powerup.powerup_amount = 1
 
       powerup.update = function(self, dt)
-         self:update_collision()
+         self:update_always(dt)
          self.y = self.y + self.speed * dt
 
          if self.health <= 0

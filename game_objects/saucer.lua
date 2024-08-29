@@ -35,9 +35,10 @@ return {
       saucer.dying_animation = Animation.create_scaling_animation(data.explosion_sprite, saucer.width)
 
       saucer.update = function(self, dt)
+
          if self.state ~= GameObject.State.dead then
 
-            self:update_collision()
+            self:update_always(dt)
 
             self.x, self.y = self.movement_profile:update(self, dt)
 
@@ -83,7 +84,12 @@ return {
       end
 
       saucer.draw = function(self)
-         if self.state == GameObject.State.alive then
+         if self.state == GameObject.State.spawning then
+            love.graphics.push()
+               love.graphics.applyTransform(self.spawn_profile:get_transform(self))
+               self:render()
+            love.graphics.pop()
+         elseif self.state == GameObject.State.alive then
 
             self:render()
 

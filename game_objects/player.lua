@@ -114,6 +114,13 @@ return {
       player.draw = function(self)
 
          local render = {
+            [GameObject.State.spawning] = function ()
+               love.graphics.push()
+                  love.graphics.applyTransform(self.spawn_profile:get_transform())
+                  self:render()
+               love.graphics.pop()
+            end,
+
             [GameObject.State.alive] = function()
                self:render()
             end,
@@ -139,7 +146,7 @@ return {
 
       player.update = function(self, dt)
 
-         self:update_collision()
+         self:update_always(dt)
 
          self.weapon:update(dt)
 

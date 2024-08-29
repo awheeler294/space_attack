@@ -3,6 +3,7 @@ local rs = require "resolution_solution.resolution_solution"
 local MovementProfiles = require("game_objects.movement_profiles")
 local Saucer = require("game_objects.saucer")
 local SaucerData = require("resources.game_object_data.saucers")
+local SpawnProfiles = require("game_objects.spawn_profiles")
 
 local saucer_type = {
    SaucerData.green_saucer,
@@ -13,6 +14,7 @@ local saucer_type = {
 local enemy_margin_h = 50
 local enemy_margin_v = 50
 
+-- Enemies move back and forth as a single large block
 local block_wave = function(danger_level, rows)
    local game_objects = {}
 
@@ -28,6 +30,7 @@ local block_wave = function(danger_level, rows)
          local y = enemy_margin_v + r * (h * 1.5)
          -- print("x: ", x)
          local saucer = Saucer.new(saucer_data, x, y)
+         saucer.spawn_profile = SpawnProfiles.rotate.new()
          saucer.weapon.cooldown = saucer.weapon.cooldown + r + c
 
          table.insert(game_objects, saucer)
@@ -37,6 +40,7 @@ local block_wave = function(danger_level, rows)
    return game_objects
 end
 
+-- Enemies move back and forth, with every other row moving in the opposite direction
 local transverse_block_wave = function(danger_level, rows)
    local less_danger = math.max(1, danger_level - 1)
    local game_objects = {}
@@ -63,6 +67,7 @@ local transverse_block_wave = function(danger_level, rows)
          local saucer = Saucer.new(saucer_data, x, y)
          saucer.weapon.cooldown = saucer.weapon.cooldown + r + c
          saucer.direction = saucer.direction * direction
+         saucer.spawn_profile = SpawnProfiles.horizontal.new(saucer)
 
          table.insert(game_objects, saucer)
       end
@@ -86,6 +91,7 @@ local circle_wave = function(danger_level, circle_count, ring_count)
 
       local center_saucer = Saucer.new(saucer_data, center_x, center_y)
       center_saucer.movement_profile = MovementProfiles.stationary.new()
+      center_saucer.spawn_profile = SpawnProfiles.scaled.new()
       table.insert(game_objects, center_saucer)
 
       for ring = 1, ring_count do
@@ -95,6 +101,7 @@ local circle_wave = function(danger_level, circle_count, ring_count)
 
          for angle = 0, 2 * math.pi, (2 * math.pi) / (6 * ring) do
             local saucer = Saucer.new(ring_saucer_data, center_x, center_y + r)
+            saucer.spawn_profile = SpawnProfiles.scaled.new()
             saucer.movement_profile = MovementProfiles.circular.new(center_saucer, r, angle)
 
             if ring % 2 == 0 then

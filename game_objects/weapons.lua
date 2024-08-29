@@ -18,7 +18,7 @@ local function build_laser(data, x, y, rotation)
 
    laser.update = function(self, dt)
 
-      self:update_collision()
+      self:update_always(dt)
 
       if math.abs(self.y - self.base_y) > self.range then
          self.health = 0
