@@ -11,7 +11,7 @@ local Sprites = require("resources.sprites.sprites")
 local Weapons = require("game_objects.weapons")
 
 
-local powerup_data = {
+local WeaponLevelsData = {
    {
       weapon = Lasers.LaserGun,
       shot_type = Lasers.BlueLaser,
@@ -59,32 +59,20 @@ return {
       }
 
       player.movement_porfile = MovementProfiles.human_control.new()
-
       player.max_health = max_health
+      player.weapon_level = 0
+      player.weapon_level_decay = 0
+      player.weapon_level_decay_rate = 1/10
 
-      player.powerup_level = 0
+      player.rebuild_weapon = function(self)
 
-      player.powerup = function(self, power)
-
-         while power > 0 do
-            if self.health < self.max_health then
-               self.health = self.health + 1
-            elseif self.shield.health < self.shield.max_health then
-               self.shield.health = self.shield.health + 1
-            elseif self.powerup_level < #powerup_data then
-               self.powerup_level = self.powerup_level + 1
-            end
-
-            power = power - 1
-         end
-
-         local power_idx = math.min(self.powerup_level, #powerup_data)
+         local idx = math.min(self.weapon_level, #WeaponLevelsData)
 
          local new_weapon = Weapons.build_gun (
             self.width / 2,
             self.height,
-            powerup_data[power_idx].weapon,
-            powerup_data[power_idx].shot_type
+            WeaponLevelsData[idx].weapon,
+            WeaponLevelsData[idx].shot_type
          )
 
          if self.weapon then
@@ -92,6 +80,26 @@ return {
          end
 
          self.weapon = new_weapon
+
+      end
+
+      player.powerup = function(self, power)
+
+         while power > 0 do
+
+            if self.health < self.max_health then
+               self.health = self.health + 1
+            elseif self.shield.health < self.shield.max_health then
+               self.shield.health = self.shield.health + 1
+            else
+               self.weapon_level = self.weapon_level + 1
+            end
+
+            power = power - 1
+
+         end
+
+         self:rebuild_weapon()
 
       end
 
@@ -159,6 +167,15 @@ return {
          self:update_always(dt)
 
          self.weapon:update(dt)
+
+         if self.weapon_level > #WeaponLevelsData - 1 then
+            self.weapon_level_decay = self.weapon_level_decay + self.weapon_level_decay_rate * dt
+            if self.weapon_level_decay >= 1 then
+               self.weapon_level = self.weapon_level - 1
+               self.weapon_level_decay = 0
+               self:rebuild_weapon()
+            end
+         end
 
          self.x, self.y, self.shear_x = self.movement_porfile:update(self, dt)
 
