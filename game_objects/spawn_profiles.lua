@@ -15,7 +15,7 @@ return {
 
             update = function() end,
 
-            get_transform = function()
+            get_transform = function(_, _)
                return love.math.newTransform()
             end,
 
@@ -41,7 +41,7 @@ return {
                self.radius = self.radius - self.radius / 10
             end,
 
-            get_transform = function(self)
+            get_transform = function(self, _)
                local tx = self.radius * math.cos(self.angle)
                local ty = self.radius * math.sin(self.angle)
 
@@ -77,7 +77,7 @@ return {
                self.offset = self.offset - self.speed * dt
             end,
 
-            get_transform = function(self)
+            get_transform = function(self, _)
                local tx = self.offset * self.direction
                local ty = 0
 

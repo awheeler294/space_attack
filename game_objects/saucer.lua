@@ -109,10 +109,6 @@ return {
 
       saucer.maybeAttack = function(self)
          return self.weapon:maybeAttack(self.x, self.y)
-         -- if self.attack_cooldown <= 0 then
-         --    self.attack_cooldown = self.attack_rate
-         --    return build_laser(laser_data.blueLaser, self.x + self.width / 2, self.y - self.height, sprite_sheet)
-         -- end
       end
 
 
