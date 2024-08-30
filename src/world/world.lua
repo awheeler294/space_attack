@@ -89,9 +89,9 @@ return {
                end
             end,
 
-            draw = function(self)
+            draw = function(self, draw_backdrops)
                for _, animation in ipairs(self) do
-                  animation:draw()
+                  animation:draw(draw_backdrops)
                end
             end,
          },
@@ -241,9 +241,10 @@ return {
          end,
 
          draw = function(self)
+            local draw_text_backdrops = not self.pause_menu.is_visible
             self.backdrop:draw()
             self.game_objects:draw()
-            self.text_animations:draw()
+            self.text_animations:draw(draw_text_backdrops)
 
             self.pause_menu:draw()
          end,

@@ -123,6 +123,8 @@ local function create_text_animation(text)
       state = AnimationState.running,
       frame_elapsed_time = 0,
       frame_rate = 5/6,
+      padding = 20,
+      corner_radius = 10,
 
       update = function (self, dt)
          if self.state == AnimationState.running then
@@ -140,16 +142,31 @@ local function create_text_animation(text)
          end
       end,
 
-      draw = function (self)
-         love.graphics.push()
+      draw = function (self, shade_background)
+         love.graphics.push("all")
 
             love.graphics.setFont(Fonts.announce)
 
             local message = string.sub(self.text, 1, self.current_frame)
             local message_width = Fonts.announce:getWidth(message)
+            local message_height = Fonts.announce:getHeight()
 
             local x = rs.game_width / 2 - message_width / 2
             local y = rs.game_height / 3
+
+            if shade_background then
+               love.graphics.push("all")
+                  love.graphics.setColor(0, 0, 0, .6)
+                  love.graphics.rectangle(
+                     "fill",
+                     x - self.padding,
+                     y - self.padding,
+                     message_width + (self.padding * 2),
+                     message_height + (self.padding * 2),
+                     self.corner_radius
+                  )
+               love.graphics.pop()
+            end
 
             love.graphics.printf(message, x, y, message_width, "center")
 
