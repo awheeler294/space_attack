@@ -4,6 +4,8 @@
 
 ### How to run
 
+**[Try it in the browser](https://awheeler294.github.io/space_attack/)** (experimental, expect some bugs).
+
 Space Attack requires [Love 2D](https://love2d.org).
 Instructions for [running a Love 2D game](https://love2d.org/wiki/Getting_Started)
 
