@@ -1,14 +1,14 @@
 [submodule "debugger"]
-	path = game/debugger
+	path = src/debugger
 	url = https://github.com/slembcke/debugger.lua.git
 [submodule "TESound"]
-	path = game/TESound
+	path = src/TESound
 	url = https://github.com/drhayes/TESound.git
 [submodule "push"]
 	path = push
 	url = https://github.com/Ulydev/push.git
 [submodule "resolution_solution"]
-	path = game/resolution_solution
+	path = src/resolution_solution
 	url = https://github.com/Vovkiv/resolution_solution.git
 [submodule "Luvent"]
 	path = Luvent
