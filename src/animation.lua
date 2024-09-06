@@ -142,7 +142,7 @@ local function create_text_animation(text)
          end
       end,
 
-      draw = function (self, shade_background)
+      draw = function (self)
          love.graphics.push("all")
 
             love.graphics.setFont(Fonts.announce)
@@ -154,19 +154,17 @@ local function create_text_animation(text)
             local x = rs.game_width / 2 - message_width / 2
             local y = rs.game_height / 3
 
-            if shade_background then
-               love.graphics.push("all")
-                  love.graphics.setColor(0, 0, 0, .6)
-                  love.graphics.rectangle(
-                     "fill",
-                     x - self.padding,
-                     y - self.padding,
-                     message_width + (self.padding * 2),
-                     message_height + (self.padding * 2),
-                     self.corner_radius
-                  )
-               love.graphics.pop()
-            end
+            love.graphics.push("all")
+               love.graphics.setColor(0, 0, 0, .6)
+               love.graphics.rectangle(
+                  "fill",
+                  x - self.padding,
+                  y - self.padding,
+                  message_width + (self.padding * 2),
+                  message_height + (self.padding * 2),
+                  self.corner_radius
+               )
+            love.graphics.pop()
 
             love.graphics.printf(message, x, y, message_width, "center")
 

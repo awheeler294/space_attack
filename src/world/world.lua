@@ -5,6 +5,7 @@ local Animation = require("animation")
 local Backdrop = require("world.backdrop")
 local GameObjects = require("game_objects.game_objects")
 local Menu = require("menu")
+local MovementProfiles = require("game_objects.movement_profiles")
 local Player = require("game_objects.player")
 local Powerup = require("game_objects.powerups")
 local Wave = require("world.wave")
@@ -16,8 +17,7 @@ local menu_items = {
 }
 
 local world_state = {
-   player_won = "Player Won",
-   player_died = "Player Died",
+   game_over = "Game Over",
    running = "Running",
    paused = "Paused",
 }
@@ -80,7 +80,44 @@ return {
             end
          },
 
-         pause_menu = Menu.new("Paused", { menu_items.resume, menu_items.restart, menu_items.quit, }),
+         menu_manager = {
+            pause_menu = Menu.new({title = "Paused", menu_items = { menu_items.resume, menu_items.restart, menu_items.quit, }}),
+            game_over_menu = Menu.new({menu_items = { menu_items.restart, menu_items.quit, }, shade_background = false, shade_menu_items = true, skip_lines = 1}),
+
+            visible_menu = false,
+
+            update = function(self, state, text_animations)
+               if
+                  state == world_state.game_over
+                  and self.visible_menu == false
+                  and text_animations:has_active() == false
+               then
+
+                  self:show_menu(self.game_over_menu)
+
+               end
+            end,
+
+            draw = function(self)
+               if self.visible_menu then
+                  self.visible_menu:draw()
+               end
+            end,
+
+            handle_keypress = function(self, key)
+               if self.visible_menu then
+                  return self.visible_menu:handle_keypress(key)
+               end
+            end,
+
+            show_menu = function(self, menu)
+               if menu then
+                  menu:reset_selection()
+               end
+
+               self.visible_menu = menu
+            end
+         },
 
          text_animations = {
             update = function(self, dt)
@@ -89,10 +126,22 @@ return {
                end
             end,
 
-            draw = function(self, draw_backdrops)
-               for _, animation in ipairs(self) do
-                  animation:draw(draw_backdrops)
+            draw = function(self, menu_manager)
+               if menu_manager.visible_menu == false then
+                  for _, animation in ipairs(self) do
+                     animation:draw()
+                  end
                end
+            end,
+
+            has_active = function(self)
+               for _, animation in ipairs(self) do
+                  if animation.state ~= Animation.State.stopped then
+                     return true
+                  end
+               end
+
+               return false
             end,
          },
 
@@ -210,30 +259,35 @@ return {
 
                      self.game_objects.hostiles = Wave.build_wave(self.wave_count)
 
-                     if self.state ~= world_state.player_won and #self.game_objects.hostiles == 0 then
-                        if not self.text_animations.player_won then
-                           self.text_animations.player_won = true
+                     if self.state ~= world_state.game_over and #self.game_objects.hostiles == 0 then
+                        -- only start the animation once
+                        if not self.text_animations.game_over then
+                           self.text_animations.game_over = true
                            table.insert(self.text_animations, Animation.create_text_animation("You Win!"))
                         end
-                        self.pause_menu.title = "You Win!"
-                        self.state = world_state.player_won
+                        self.menu_manager.game_over_menu.title = "You Win!"
+                        self.state = world_state.game_over
+                        player.movement_profile = MovementProfiles.stationary.new()
                      end
 
                   end
                end
 
-               if self.state ~= world_state.player_died and self.game_objects.player.health <= 0 then
-                  if not self.text_animations.player_died then
-                     self.text_animations.player_died = true
+               if self.state ~= world_state.game_over and self.game_objects.player.health <= 0 then
+                  -- only start the animation once
+                  if not self.text_animations.game_over then
+                     self.text_animations.game_over = true
                      table.insert(self.text_animations, Animation.create_text_animation("You Died"))
                   end
-                  self.pause_menu.title = "You Died"
-                  self.state = world_state.player_died
+                  self.menu_manager.game_over_menu.title = "You Died"
+                  self.state = world_state.game_over
                end
+
+               self.menu_manager:update(self.state, self.text_animations)
 
                self.text_animations:update(dt)
                self.backdrop:update(dt)
-               self.game_objects:update(dt)
+               self.game_objects:update(dt, self.state)
 
                self.mouse_timer:update()
 
@@ -241,44 +295,41 @@ return {
          end,
 
          draw = function(self)
-            local draw_text_backdrops = not self.pause_menu.is_visible
             self.backdrop:draw()
-            self.game_objects:draw()
-            self.text_animations:draw(draw_text_backdrops)
 
-            self.pause_menu:draw()
+            self.game_objects:draw()
+
+            self.text_animations:draw(self.menu_manager)
+
+            self.menu_manager:draw()
          end,
 
          handle_keypress = function(self, key)
-            if self.state == world_state.paused then
 
-               if key == "escape" then
-                  self.pause_menu:set_visible(false)
+            if key == "escape" then
+               if self.state == world_state.paused then
+                  self.menu_manager:show_menu(false)
                   self.state = world_state.running
                else
-                  local result = self.pause_menu:handle_keypress(key)
-
-                  if result == menu_items.resume then
-                     self.pause_menu:set_visible(false)
-                     self.state = world_state.running
-                  end
-
-                  if result == menu_items.quit then
-                     love.event.push('quit')
-                  end
-
-                  return result
-               end
-
-            else
-
-               if key == "escape" then
                   self.state = world_state.paused
                   love.mouse.setVisible(true)
-                  self.pause_menu:set_visible(true)
+                  self.menu_manager:show_menu(self.menu_manager.pause_menu)
+               end
+            else
+               local result = self.menu_manager:handle_keypress(key)
+
+               if result == menu_items.resume then
+                  self.menu_manager:show_menu(false)
+                  self.state = world_state.running
                end
 
+               if result == menu_items.quit then
+                  love.event.push('quit')
+               end
+
+               return result
             end
+
          end,
       }
    end,

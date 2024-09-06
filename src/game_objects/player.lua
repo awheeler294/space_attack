@@ -58,7 +58,7 @@ return {
          Sprites.playerShip1_damage3,
       }
 
-      player.movement_porfile = MovementProfiles.human_control.new()
+      player.movement_profile = MovementProfiles.human_control.new()
       player.max_health = max_health
       player.weapon_level = 0
       player.weapon_level_decay = 0
@@ -177,7 +177,11 @@ return {
             end
          end
 
-         self.x, self.y, self.shear_x = self.movement_porfile:update(self, dt)
+         self.x, self.y, self.shear_x = self.movement_profile:update(self, dt)
+
+         if self.shear_x == nil then
+            self.shear_x = 0
+         end
 
          if self.shield then
             self.shield:update(self)
